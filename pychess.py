@@ -40,7 +40,13 @@ class ChessBoard:
 	def move(self, location1, location2):
 		if self.__selfTake(location1, location2) == True:
 			if self.__offBoardCheck(location2) == True:
-				print('pass')
+				print('checked pass 1')
+				if self.board[location1].movePiece(location2) == True:
+					print('checked pass 2')
+					self.board[location2] = self.board[location1]
+					self.board[location1] = None
+					self.board[location2].location = location2
+
 
 	def __selfTake(self, location1, location2):
 		if self.board[location1] != None:
@@ -107,7 +113,7 @@ def updateElo(Ra, Sa, Ea):
 def game():
 	board = ChessBoard()
 	board.print_board()
-	board.move(0x0, 0x20)
+	board.move(0x1, 0x33)
 
 if __name__ == '__main__':
 	game()
