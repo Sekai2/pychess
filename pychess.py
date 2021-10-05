@@ -1,4 +1,3 @@
-from misc import *
 from piece import *
 
 #Board Class
@@ -46,6 +45,7 @@ class ChessBoard:
 					self.board[location2] = self.board[location1]
 					self.board[location1] = None
 					self.board[location2].location = location2
+					self.print_board()
 
 
 	def __selfTake(self, location1, location2):
@@ -65,6 +65,7 @@ class ChessBoard:
 			return True
 
 		elif colour1 == colour2:
+			print('self take error')
 			return False
 
 		else:
@@ -75,6 +76,7 @@ class ChessBoard:
 			return True
 
 		else:
+			print('off board error')
 			return False
 
 	def print_board(self):
@@ -113,7 +115,8 @@ def updateElo(Ra, Sa, Ea):
 def game():
 	board = ChessBoard()
 	board.print_board()
-	board.move(0x1, 0x33)
+	board.move(0x1, 0x22)
+	board.move(0x22, 0x30)
 
 if __name__ == '__main__':
 	game()

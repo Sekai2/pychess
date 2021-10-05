@@ -1,3 +1,23 @@
+#miscellaneous functions
+
+def negcheck(x):
+	if x < 0:
+		return True
+	return False
+
+def board_file(i):
+	file = i & 7
+	return file
+
+def board_rank(i):
+	rank = (i >> 4)
+	return rank
+
+def abs(x):
+	if negcheck(x) == True:
+		x = -1 * x
+	return x
+
 #piece class
 
 #diagonal sliding for queens and bishops
@@ -39,12 +59,15 @@ class Knight(Piece):
 			self.character = self.character.lower()
 
 	def movePiece(self, destination):
+		print('Knight selected')
 		if (board_rank(destination) == board_rank(self.location) + 2) or (board_rank(destination) == board_rank(self.location) - 2):
 			if (board_file(destination) == board_file(self.location) + 1) or (board_file(destination) == board_file(self.location) - 1):
+				print('pass again')
 				return True
 
 		elif (board_rank(destination) == board_rank(self.location) + 1) or (board_rank(destination) == board_rank(self.location) - 1):
 			if (board_file(destination) == board_file(self.location) + 2) or (board_file(destination) == board_file(self.location) - 2):
+				print('pass again')
 				return True
 
 		else:
