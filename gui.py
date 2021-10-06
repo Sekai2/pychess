@@ -9,7 +9,9 @@ class gui():
 		pygame.display.set_icon(logo)
 		pygame.display.set_caption('Pychess')
 
-		screen = pygame.display.set_mode((240,180))
+		board = pygame.image.load('assets/board.png')
+		screen = pygame.display.set_mode((631,632))
+		
 
 		running = True
 
