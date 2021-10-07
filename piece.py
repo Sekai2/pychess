@@ -47,8 +47,34 @@ class Pawn(Piece):
 		if self.colour == 'white':
 			self.character = self.character.lower()
 
-	def movePiece(self, destination):
-		pass
+	def movePiece(self, destination, objPiece):
+		print('Pawn selected')
+		if objPiece == None:
+			if board_file(self.location) == board_file(self.location):
+				if board_rank(self.location) == 1:
+					if board_rank(destination) - board_rank(self.location) <= 2:
+						return True
+
+				elif board_rank(self.location) == 6:
+					if board_rank(self.location) - board_rank(destination) <= 2:
+						return True
+
+				elif abs(board_rank(destination) - board_rank(self.location)) == 1:
+					return True
+
+				else:
+					return False
+
+		elif objPiece.colour != self.colour:
+			if abs(board_rank(destination) - board_rank(self.location)) == 1:
+				if abs(board_file(destination) - board_file(self.location)) == 1:
+					return True
+
+				else:
+					return False
+
+		else:
+			return False
 
 class Knight(Piece):
 	def __init__(self, colour, location):

@@ -37,15 +37,38 @@ class ChessBoard:
 				self.board[i] = Pawn('black', i)
 
 	def move(self, location1, location2):
-		if self.__selfTake(location1, location2) == True:
-			if self.__offBoardCheck(location2) == True:
-				print('checked pass 1')
-				if self.board[location1].movePiece(location2) == True:
-					print('checked pass 2')
-					self.board[location2] = self.board[location1]
-					self.board[location1] = None
-					self.board[location2].location = location2
-					self.print_board()
+		piece1 = self.board[location1]
+		piece2 = self.board[location2]
+		if piece1 != None:
+			if self.__selfTake(location1, location2) == True:
+				if self.__offBoardCheck(location2) == True:
+					print('checked pass 1')
+					if piece1.character.lower() != 'p':
+						if piece1.movePiece(location2) == True:
+							print('checked pass 2')
+							self.board[location2] = self.board[location1]
+							self.board[location1] = None
+							self.board[location2].location = location2
+							self.print_board()
+							self.attack_check(piece1,piece2)
+							return True
+
+					elif self.board[location1].character.lower() == 'p':
+						if self.board[location1].movePiece(location2, self.board[location2]) == True:
+							print('checked pass 2')
+							self.board[location2] = self.board[location1]
+							self.board[location1] = None
+							self.board[location2].location = location2
+							self.print_board()
+							self.attack_check(piece1,piece2)
+							return True
+
+		print('Failed')
+		self.print_board()
+		return False
+
+	def attack_check(piece1,piece2):
+		if piece1.colour == piece2.colour:
 
 
 	def __selfTake(self, location1, location2):
@@ -95,7 +118,7 @@ class ChessBoard:
 #player class
 class player():
 	def __init__(self):
-		pass
+		self.score = 0
 
 #chess ai class
 class computer(player):
@@ -115,8 +138,7 @@ def updateElo(Ra, Sa, Ea):
 def game():
 	board = ChessBoard()
 	board.print_board()
-	board.move(0x1, 0x22)
-	board.move(0x22, 0x30)
+	board.move(0x10, 0x30)
 
 if __name__ == '__main__':
 	game()
