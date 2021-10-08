@@ -1,4 +1,191 @@
-from piece import *
+from misc import *
+
+#piece class
+class Piece():
+	def __init__(self, colour, location):
+		self.colour = colour
+		self.location = location
+
+	#diagonal sliding for queens and bishops
+	def diagonal_check(self, location1, location2):
+		if (location1 % 17 == location2 % 17):
+			return 1
+
+		elif (location1 % 15 == location2 % 15):
+			return -1
+
+	def diagonal_slide(self, location1, location2):
+		pass
+
+	def straight_check(self, location1, location2):
+		if board_file(location1) == board_file(location2):
+			print('verticle slide')
+			distance = board_rank(location2) - board_rank(location1)
+			print(distance)
+
+			direction = 1
+
+			if negcheck(distance) == True:
+				direction = -1
+
+			valid = True
+
+			count = 0
+
+			for i in range(abs(distance)-1):
+				check_location = location1 + (i * direction * 16) + (16 * direction)
+				print(check_location)
+
+				if board1.board[check_location] == None:
+					print('here')
+					count += 1
+
+			if count == abs(distance) -1:
+				return True
+
+			else:
+				print('not here')
+				return False
+
+		elif board_rank(location1) == board_rank(location2):
+			print('horizontal slide')
+			distance = board_file(location2) - board_file(location1)
+			print(distance)
+
+			direction = 1
+
+			if negcheck(distance) == True:
+				direction = -1
+
+			valid = True
+
+			count = 0
+
+			for i in range(abs(distance)-1):
+				check_location = location1 + (i * direction ) + ( direction)
+				print(check_location)
+
+				if board1.board[check_location] == None:
+					print('here')
+					count += 1
+
+			if count == abs(distance) -1:
+				return True
+
+			else:
+				print('not here')
+				return False
+
+		else:
+			return False
+
+
+
+
+class Pawn(Piece):
+	def __init__(self, colour, location):
+		Piece.__init__(self, colour, location)
+		self.value = 1
+		self.character = 'P'
+		if self.colour == 'white':
+			self.character = self.character.lower()
+
+	def movePiece(self, destination, objPiece):
+		print('Pawn selected')
+		if objPiece == None:
+			if board_file(self.location) == board_file(self.location):
+				if board_rank(self.location) == 1:
+					if board_rank(destination) - board_rank(self.location) <= 2:
+						return True
+
+				elif board_rank(self.location) == 6:
+					if board_rank(self.location) - board_rank(destination) <= 2:
+						return True
+
+				elif abs(board_rank(destination) - board_rank(self.location)) == 1:
+					return True
+
+				else:
+					return False
+
+		elif objPiece.colour != self.colour:
+			if abs(board_rank(destination) - board_rank(self.location)) == 1:
+				if abs(board_file(destination) - board_file(self.location)) == 1:
+					return True
+
+				else:
+					return False
+
+		else:
+			return False
+
+class Knight(Piece):
+	def __init__(self, colour, location):
+		Piece.__init__(self, colour, location)
+		self.value = 3
+		self.character = 'N'
+		if self.colour == 'white':
+			self.character = self.character.lower()
+
+	def movePiece(self, destination):
+		print('Knight selected')
+		if (board_rank(destination) == board_rank(self.location) + 2) or (board_rank(destination) == board_rank(self.location) - 2):
+			if (board_file(destination) == board_file(self.location) + 1) or (board_file(destination) == board_file(self.location) - 1):
+				print('pass again')
+				return True
+
+		elif (board_rank(destination) == board_rank(self.location) + 1) or (board_rank(destination) == board_rank(self.location) - 1):
+			if (board_file(destination) == board_file(self.location) + 2) or (board_file(destination) == board_file(self.location) - 2):
+				print('pass again')
+				return True
+
+		else:
+			return False
+
+class Bishop(Piece):
+	def __init__(self, colour, location):
+		Piece.__init__(self, colour, location)
+		self.value = 3
+		self.character = 'B'
+		if self.colour == 'white':
+			self.character = self.character.lower()
+
+	def movePiece(self, destination):
+		pass
+
+class Rook(Piece):
+	def __init__(self, colour, location ):
+		Piece.__init__(self, colour, location)
+		self.value = 5
+		self.character = 'R'
+		if self.colour == 'white':
+			self.character = self.character.lower()
+
+	def movePiece(self, destination):
+		print('Rook selected')
+		return self.straight_check(self.location, destination)
+
+class Queen(Piece):
+	def __init__(self, colour, location):
+		Piece.__init__(self, colour, location)
+		self.value = 9
+		self.character = 'Q'
+		if self.colour == 'white':
+			self.character = self.character.lower()
+
+	def movePiece(self, destination):
+		pass
+
+class King(Piece):
+	def __init__(self, colour, location):
+		Piece.__init__(self, colour, location)
+		self.value = 10000000
+		self.character = 'K'
+		if self.colour == 'white':
+			self.character = self.character.lower()
+
+	def movePiece(self, destination):
+		pass
 
 #Board Class
 class ChessBoard:
@@ -50,7 +237,7 @@ class ChessBoard:
 							self.board[location1] = None
 							self.board[location2].location = location2
 							self.print_board()
-							self.attack_check(piece2)
+							self.attack_check(piece1,piece2)
 							return True
 
 					elif self.board[location1].character.lower() == 'p':
@@ -115,9 +302,6 @@ class ChessBoard:
 		if piece2 != None:
 			score_change(piece1, piece2)
 
-def score_change(piece1, piece2):
-	return piece2.value
-
 #player class
 class player():
 	def __init__(self):
@@ -129,22 +313,18 @@ class computer(player):
 		player.__init__(self)
 		pass
 
-#Elo Calculation
-def expectedScore(Ra, Rb):
-	Ea = 1 / (1 + 10 ** ((Rb - Ra) / 400))
-	return Ea
-
-def updateElo(Ra, Sa, Ea):
-	NewRa = Ra + 34 *(Sa - Ea)
-	return NewRa
-
 def game():
-	board = ChessBoard()
-	board.print_board()
-	board.move(0x10, 0x30)
-	board.move(0x60, 0x40)
-	board.move(0x11, 0x31)
-	board.move(0x31, 0x41)
+	global board1
+	board1 = ChessBoard()
+	board1.print_board()
+	board1.move(0x10, 0x30)
+	board1.move(0x60, 0x40)
+	board1.move(0x11, 0x31)
+	board1.move(0x31, 0x41)
+	board1.move(0x00, 0x20)
+	board1.move(0x20, 0x10)
+	board1.move(0x10, 0x11)
+	board1.move(0x11, 0x51)
 
 if __name__ == '__main__':
 	game()
