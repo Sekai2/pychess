@@ -50,7 +50,7 @@ class ChessBoard:
 							self.board[location1] = None
 							self.board[location2].location = location2
 							self.print_board()
-							self.attack_check(piece1,piece2)
+							self.attack_check(piece2)
 							return True
 
 					elif self.board[location1].character.lower() == 'p':
@@ -60,16 +60,12 @@ class ChessBoard:
 							self.board[location1] = None
 							self.board[location2].location = location2
 							self.print_board()
-							self.attack_check(piece1,piece2)
+							self.attack_check(piece1, piece2)
 							return True
 
 		print('Failed')
 		self.print_board()
 		return False
-
-	def attack_check(piece1,piece2):
-		if piece1.colour == piece2.colour:
-
 
 	def __selfTake(self, location1, location2):
 		if self.board[location1] != None:
@@ -115,6 +111,13 @@ class ChessBoard:
 				x += 1
 			print(out)
 
+	def attack_check(self, piece1, piece2):
+		if piece2 != None:
+			score_change(piece1, piece2)
+
+def score_change(piece1, piece2):
+	return piece2.value
+
 #player class
 class player():
 	def __init__(self):
@@ -139,6 +142,9 @@ def game():
 	board = ChessBoard()
 	board.print_board()
 	board.move(0x10, 0x30)
+	board.move(0x60, 0x40)
+	board.move(0x11, 0x31)
+	board.move(0x31, 0x41)
 
 if __name__ == '__main__':
 	game()

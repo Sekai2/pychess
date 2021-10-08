@@ -19,25 +19,41 @@ def abs(x):
 	return x
 
 #piece class
-
-#diagonal sliding for queens and bishops
-def diagonal_check(location1, location2):
-	if (location1 % 17 == location2 % 17):
-		return 1
-
-	elif (location1 % 15 == location2 % 15):
-		return -1
-
-#diagonal sliding for queens and rooks
-def straight_check(location1, location2):
-	if (board_file(location1) == board_file(location2)):
-		if (board_rank(location1) == board_rank(location2)):
-			return True
-
 class Piece():
 	def __init__(self, colour, location):
 		self.colour = colour
 		self.location = location
+
+	#diagonal sliding for queens and bishops
+	def diagonal_check(location1, location2):
+		if (location1 % 17 == location2 % 17):
+			return 1
+
+		elif (location1 % 15 == location2 % 15):
+			return -1
+
+	def diagonal_slide(location1, location2):
+		pass
+
+	def straight_check(location1, location2):
+		if board_file(location1) == board_file(location2):
+			print('verticle slide')
+
+			direction = 1
+
+			if negcheck(distance) == True:
+				direction = -1
+
+			distance = board_file(location2) - board_file(location1)
+			for i in range(abs(distance)):
+				check_location = 
+
+
+		elif board_rank(location1) == board_rank(location2):
+			print('horizontal slide')
+
+
+
 
 class Pawn(Piece):
 	def __init__(self, colour, location):
