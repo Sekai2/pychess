@@ -1,0 +1,2 @@
+notes:
+straight check can be optimized using while loop

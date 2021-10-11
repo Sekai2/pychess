@@ -1,4 +1,5 @@
 from misc import *
+from score import *
 
 #piece class
 class Piece():
@@ -9,13 +10,32 @@ class Piece():
 	#diagonal sliding for queens and bishops
 	def diagonal_check(self, location1, location2):
 		if (location1 % 17 == location2 % 17):
-			return 1
+			print('diagonal right')
+			direction = 17
 
 		elif (location1 % 15 == location2 % 15):
-			return -1
+			print('diagonal left')
+			direction = 15
 
-	def diagonal_slide(self, location1, location2):
-		pass
+		else:
+			return False
+
+		distance = board_rank(location2) - board_rank(location1)
+		if negcheck(distance) == True:
+			direction = -1 * (direction)
+
+		blocked = False
+		check_location = location1
+		while blocked == False:
+			check_location = check_location + direction
+			print(check_location)
+
+			if check_location == location2:
+				return True
+
+			elif board1.board[check_location] != None:
+				return False
+
 
 	def straight_check(self, location1, location2):
 		if board_file(location1) == board_file(location2):
@@ -37,14 +57,12 @@ class Piece():
 				print(check_location)
 
 				if board1.board[check_location] == None:
-					print('here')
 					count += 1
 
 			if count == abs(distance) -1:
 				return True
 
 			else:
-				print('not here')
 				return False
 
 		elif board_rank(location1) == board_rank(location2):
@@ -63,17 +81,14 @@ class Piece():
 
 			for i in range(abs(distance)-1):
 				check_location = location1 + (i * direction ) + ( direction)
-				print(check_location)
 
 				if board1.board[check_location] == None:
-					print('here')
 					count += 1
 
 			if count == abs(distance) -1:
 				return True
 
 			else:
-				print('not here')
 				return False
 
 		else:
@@ -151,13 +166,15 @@ class Bishop(Piece):
 			self.character = self.character.lower()
 
 	def movePiece(self, destination):
-		pass
+		print('bishop selected')
+		return self.diagonal_check(self.location, destination)
 
 class Rook(Piece):
 	def __init__(self, colour, location ):
 		Piece.__init__(self, colour, location)
 		self.value = 5
 		self.character = 'R'
+
 		if self.colour == 'white':
 			self.character = self.character.lower()
 
@@ -174,7 +191,16 @@ class Queen(Piece):
 			self.character = self.character.lower()
 
 	def movePiece(self, destination):
-		pass
+		print('queen selected')
+		print(self.diagonal_check(self.location, destination))
+		if self.straight_check(self.location, destination) == True:
+			return True
+
+		elif self.diagonal_check(self.location, destination) == True:
+			return True
+
+		else:
+			return False
 
 class King(Piece):
 	def __init__(self, colour, location):
@@ -185,7 +211,7 @@ class King(Piece):
 			self.character = self.character.lower()
 
 	def movePiece(self, destination):
-		pass
+		print('king selected')
 
 #Board Class
 class ChessBoard:
@@ -320,11 +346,10 @@ def game():
 	board1.move(0x10, 0x30)
 	board1.move(0x60, 0x40)
 	board1.move(0x11, 0x31)
-	board1.move(0x31, 0x41)
-	board1.move(0x00, 0x20)
-	board1.move(0x20, 0x10)
-	board1.move(0x10, 0x11)
-	board1.move(0x11, 0x51)
+	board1.move(0x64, 0x44)
+	board1.move(0x73, 0x55)
+	board1.move(0x75, 0x42)
+	board1.move(0x42, 0x15)
 
 if __name__ == '__main__':
 	game()

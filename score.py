@@ -4,7 +4,8 @@ def expectedScore(Ra, Rb):
 	return Ea
 
 def updateElo(Ra, Sa, Ea):
-	NewRa = Ra + 34 *(Sa - Ea)
+	CONST_K = 34
+	NewRa = Ra + CONST_K * (Sa - Ea)
 	return NewRa
 
 def score_change(piece1, piece2):
