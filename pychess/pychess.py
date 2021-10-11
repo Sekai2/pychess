@@ -212,6 +212,15 @@ class King(Piece):
 
 	def movePiece(self, destination):
 		print('king selected')
+		if abs(board_file(destination) - board_file(self.location)) <= 1:
+			if abs(board_rank(destination) - board_rank(self.location)) <= 1:
+				return True
+
+			else:
+				return False
+
+		else:
+			return False
 
 #Board Class
 class ChessBoard:
