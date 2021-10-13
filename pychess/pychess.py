@@ -250,13 +250,19 @@ class ChessBoard:
 		self.board[118] = Knight('black', 118)
 		self.board[119] = Rook('black', 119)
 
-		#add all pawns
+		#add all pawns and checkBoard
 		for i in range (128):
-			if 16 <= i <= 23:
+			if 0x10 <= i <= 0x17:
 				self.board[i] = Pawn('white', i)
 
-			elif 96 <= i <= 103:
+			elif 0x60 <= i <= 0x67:
 				self.board[i] = Pawn('black', i)
+
+			elif 0x18 <= i <= 0x1f:
+				self.board[i] = 'W'
+
+			elif 0x68 <= i <= 0x6f:
+				self.board[i] = 'B'
 
 	def move(self, location1, location2):
 		piece1 = self.board[location1]
@@ -336,6 +342,10 @@ class ChessBoard:
 	def attack_check(self, piece1, piece2):
 		if piece2 != None:
 			score_change(piece1, piece2)
+
+	def checkBoard_update():
+		pass
+
 
 #player class
 class player():
