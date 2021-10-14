@@ -36,7 +36,6 @@ class Piece():
 			elif board1.board[check_location] != None:
 				return False
 
-
 	def straight_check(self, location1, location2):
 		if board_file(location1) == board_file(location2):
 			print('verticle slide')
@@ -94,8 +93,8 @@ class Piece():
 		else:
 			return False
 
-
-
+	def check():
+		pass
 
 class Pawn(Piece):
 	def __init__(self, colour, location):
@@ -258,12 +257,6 @@ class ChessBoard:
 			elif 0x60 <= i <= 0x67:
 				self.board[i] = Pawn('black', i)
 
-			elif 0x18 <= i <= 0x1f:
-				self.board[i] = 'W'
-
-			elif 0x68 <= i <= 0x6f:
-				self.board[i] = 'B'
-
 	def move(self, location1, location2):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
@@ -278,7 +271,7 @@ class ChessBoard:
 							self.board[location1] = None
 							self.board[location2].location = location2
 							self.print_board()
-							self.attack_check(piece1,piece2)
+							self.__attack_check(piece1,piece2)
 							return True
 
 					elif self.board[location1].character.lower() == 'p':
@@ -288,7 +281,7 @@ class ChessBoard:
 							self.board[location1] = None
 							self.board[location2].location = location2
 							self.print_board()
-							self.attack_check(piece1, piece2)
+							self.__attack_check(piece1, piece2)
 							return True
 
 		print('Failed')
@@ -339,13 +332,40 @@ class ChessBoard:
 				x += 1
 			print(out)
 
-	def attack_check(self, piece1, piece2):
+	def __attack_check(self, piece1, piece2):
 		if piece2 != None:
 			score_change(piece1, piece2)
 
-	def checkBoard_update():
-		pass
+	def __attack_board(self,piece):
+		colour = piece.colour[0]
+		if type(piece) is Bishop:
 
+			location = piece.position
+			count = 0
+			direction = 1
+			diagonal = 15
+			while count != 4:
+				location = location + (direction * diagonal)
+				if self.board[location] == None:
+					self.board[location + 8] = colour
+
+				else:
+					count += 1
+					location = piece.position
+					if count == 1:
+						direction = -1
+
+					elif count == 2:
+						direction = 0
+						diagonal = 17
+
+					else count == 3:
+						direction = -1
+		#this bit need coding
+				
+
+		if type(piece) is Rook:
+			print(True)
 
 #player class
 class player():
