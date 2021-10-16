@@ -221,6 +221,9 @@ class King(Piece):
 		else:
 			return False
 
+	def check_check(self):
+		if 
+
 #Board Class
 class ChessBoard:
 	def __init__(self):
@@ -264,8 +267,9 @@ class ChessBoard:
 			if self.__selfTake(location1, location2) == True:
 				if self.__offBoardCheck(location2) == True:
 					print('checked pass 1')
-					if piece1.character.lower() != 'p':
+					if type(piece1) is not Pawn:
 						if piece1.movePiece(location2) == True:
+
 							print('checked pass 2')
 							self.board[location2] = self.board[location1]
 							self.board[location1] = None
@@ -274,7 +278,7 @@ class ChessBoard:
 							self.__attack_check(piece1,piece2)
 							return True
 
-					elif self.board[location1].character.lower() == 'p':
+					elif type(self.board[location1]) is Pawn:
 						if self.board[location1].movePiece(location2, self.board[location2]) == True:
 							print('checked pass 2')
 							self.board[location2] = self.board[location1]
@@ -326,6 +330,8 @@ class ChessBoard:
 			out = []
 			for j in range(16):
 				try:
+					if self.board[x] == 'w' or self.board[x] == 'b':
+						out.append(self.board[x])
 					out.append(self.board[x].character)
 				except:
 					out.append('o')
@@ -356,16 +362,37 @@ class ChessBoard:
 						direction = -1
 
 					elif count == 2:
-						direction = 0
+						direction = 1
 						diagonal = 17
 
-					else count == 3:
+					elif count == 3:
 						direction = -1
 		#this bit need coding
 				
 
 		if type(piece) is Rook:
-			print(True)
+			
+			location = piece.position
+			count = 0
+			direction = 1
+			straight = 16
+			while count != 4:
+				location = location + (direction * straight)
+				if self.board[location] == None:
+					self.board[location + 8] = colour
+
+				else:
+					count +=1
+					location = piece.position
+					if count == 1:
+						direction = -1
+
+					elif count == 2:
+						direction = 1
+						straight = 1
+
+					elif count == 3:
+						direction = -1
 
 #player class
 class player():

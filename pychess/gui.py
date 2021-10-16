@@ -22,17 +22,49 @@ class gui():
 		black_queen = pygame.image.load('assets/bq.png')
 		black_king = pygame.image.load('assets/bk.png')
 
+		gameDisplay.blit(gui_board, (0,0))
+		gameDisplay.blit(black_rook, (9,10))
+		gameDisplay.blit(black_bishop, (88,10))
+		gameDisplay.blit(black_knight, (167,10))
+		gameDisplay.blit(black_queen, (246,10))
+		gameDisplay.blit(black_king, (325,10))
+		gameDisplay.blit(black_knight, (404,10))
+		gameDisplay.blit(black_bishop, (483,10))
+		gameDisplay.blit(black_rook, (562,10))
+
+		position = (9,90)
+		for i in range(8):
+			x = (79 * (i+1)) - 70
+			position = (x,90)
+			gameDisplay.blit(black_pawn, (position))
+
+		gameDisplay.blit(white_rook, (9,563))
+		gameDisplay.blit(white_bishop, (88,563))
+		gameDisplay.blit(white_knight, (167,563))
+		gameDisplay.blit(white_queen, (246,563))
+		gameDisplay.blit(white_king, (325,563))
+		gameDisplay.blit(white_knight, (404,563))
+		gameDisplay.blit(white_bishop, (483,563))
+		gameDisplay.blit(white_rook, (562,563))
+
+	class White_Pawn(pygame.sprite.sprite):
+		def __init__(self):
+			super().__init__()
+			
+
+		for i in range(8):
+			x = (79 * (i+1)) - 70
+			position = (x,484)
+			gameDisplay.blit(white_pawn, (position))
+
 		crashed = False
 		while not crashed:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					crashed = True
 
-				print(event)
-
-			gameDisplay.blit(gui_board, (0,0))
-			gameDisplay.blit(black_rook, (9,10))
-			gameDisplay.blit(black_bishop, (88,10))
+			if pygame.mouse.get_pressed() != (False, False, False):
+				print(pygame.mouse.get_pos())
 
 			pygame.display.update()
 			clock.tick(60)
