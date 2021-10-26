@@ -7,22 +7,20 @@ class gui():
 		clock = pygame.time.Clock()
 		gui_board = pygame.image.load('assets/board.png')
 
-		class White_Pawn(pygame.sprite.Sprite):
-			def __init__(self):
-				pygame.sprite.Sprite.__init__(self)
-				self.image = white_pawn()
-				self.image.set_colorkey(WHITE)
-				self.rect = self.image.get_rect();
+#		class White_Pawn(pygame.sprite.Sprite):
+#			def __init__(self):
+#				pygame.sprite.Sprite.__init__(self)
+#				self.image = white_pawn()
+#				self.image.set_colorkey(WHITE)
+#				self.rect = self.image.get_rect();
 
-		pieces = pygame.sprite.Group()
+#		pieces = pygame.sprite.Group()
 #		pieces.add(White_Pawn)
 
-		White_Pawn.rect.x = 300
-		White_Pawn.rect.y = 300
+#		White_Pawn.rect.x = 300
+#		White_Pawn.rect.y = 300
 
 		white_pawn = pygame.image.load('assets/wp.png')
-
-
 		white_bishop = pygame.image.load('assets/wb.png')
 		white_knight = pygame.image.load('assets/wn.png')
 		white_rook = pygame.image.load('assets/wr.png')
@@ -74,6 +72,8 @@ class gui():
 
 			if pygame.mouse.get_pressed() != (False, False, False):
 				print(pygame.mouse.get_pos())
+
+			
 
 			pygame.display.update()
 			clock.tick(60)

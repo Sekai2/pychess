@@ -222,7 +222,31 @@ class King(Piece):
 			return False
 
 	def check_check(self):
-		if 
+		if self.slide_check(self.location, 16) == True:
+			return True
+
+	def slide_check(self, location, direction):
+		i = 0
+		if board1.offBoardCheck(location) == True:
+			print('a')
+			if board1.board[location] != None:
+				print('b')
+				if board1.board[location].colour != self.colour:
+					print('c')
+					if board1.board[location].movePiece(self.location) == True:
+						return False
+
+			else:
+				print('c')
+				next_location = location + direction
+				self.check_straight(next_location, direction)
+
+		else:
+			print('c')
+			return True
+
+
+
 
 #Board Class
 class ChessBoard:
@@ -252,6 +276,8 @@ class ChessBoard:
 		self.board[118] = Knight('black', 118)
 		self.board[119] = Rook('black', 119)
 
+		self.Wking_location = 4
+		self.Bking_location = 116
 		#add all pawns and checkBoard
 		for i in range (128):
 			if 0x10 <= i <= 0x17:
@@ -265,7 +291,7 @@ class ChessBoard:
 		piece2 = self.board[location2]
 		if piece1 != None:
 			if self.__selfTake(location1, location2) == True:
-				if self.__offBoardCheck(location2) == True:
+				if self.offBoardCheck(location2) == True:
 					print('checked pass 1')
 					if type(piece1) is not Pawn:
 						if piece1.movePiece(location2) == True:
@@ -274,9 +300,15 @@ class ChessBoard:
 							self.board[location2] = self.board[location1]
 							self.board[location1] = None
 							self.board[location2].location = location2
-							self.print_board()
-							self.__attack_check(piece1,piece2)
-							return True
+							if self.board[self.Wking_location].check_check() == True:
+								print('not in check')
+								self.print_board()
+								self.__attack_check(piece1,piece2)
+								return True
+							else:
+								self.board[location1] = self.board[location2]
+								self.board[location2] = None
+								self.board[location1].location = location1
 
 					elif type(self.board[location1]) is Pawn:
 						if self.board[location1].movePiece(location2, self.board[location2]) == True:
@@ -315,7 +347,7 @@ class ChessBoard:
 		else:
 			return True
 
-	def __offBoardCheck(self, hexsquare):
+	def offBoardCheck(self, hexsquare):
 		if (hexsquare & 0x88) == 0:
 			return True
 
