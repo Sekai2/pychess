@@ -7,19 +7,7 @@ class gui():
 		clock = pygame.time.Clock()
 		gui_board = pygame.image.load('assets/board.png')
 
-#		class White_Pawn(pygame.sprite.Sprite):
-#			def __init__(self):
-#				pygame.sprite.Sprite.__init__(self)
-#				self.image = white_pawn()
-#				self.image.set_colorkey(WHITE)
-#				self.rect = self.image.get_rect();
-
-#		pieces = pygame.sprite.Group()
-#		pieces.add(White_Pawn)
-
-#		White_Pawn.rect.x = 300
-#		White_Pawn.rect.y = 300
-
+		#load pieces
 		white_pawn = pygame.image.load('assets/wp.png')
 		white_bishop = pygame.image.load('assets/wb.png')
 		white_knight = pygame.image.load('assets/wn.png')
@@ -34,6 +22,7 @@ class gui():
 		black_queen = pygame.image.load('assets/bq.png')
 		black_king = pygame.image.load('assets/bk.png')
 
+		#place
 		gameDisplay.blit(gui_board, (0,0))
 		gameDisplay.blit(black_rook, (9,10))
 		gameDisplay.blit(black_bishop, (88,10))
@@ -81,5 +70,3 @@ class gui():
 	def __quit(self):
 		pygame.quit()
 		quit()
-
-gui1 = gui()

@@ -1,5 +1,7 @@
+import threading
 from misc import *
 from score import *
+from gui import *
 
 #piece class
 class Piece():
@@ -286,6 +288,9 @@ class ChessBoard:
 			elif 0x60 <= i <= 0x67:
 				self.board[i] = Pawn('black', i)
 
+		#initial gui
+		gui1 = gui()
+
 	def move(self, location1, location2):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
@@ -428,8 +433,13 @@ class ChessBoard:
 
 #player class
 class player():
-	def __init__(self):
+	def __init__(self, colour):
 		self.score = 0
+		self.colour = colour
+
+	def turn():
+		pass
+
 
 #chess ai class
 class computer(player):
