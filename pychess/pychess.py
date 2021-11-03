@@ -1,7 +1,7 @@
-import threading
+import time
+import os
 from misc import *
 from score import *
-from gui import *
 
 #piece class
 class Piece():
@@ -288,9 +288,6 @@ class ChessBoard:
 			elif 0x60 <= i <= 0x67:
 				self.board[i] = Pawn('black', i)
 
-		#initial gui
-		gui1 = gui()
-
 	def move(self, location1, location2):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
@@ -309,11 +306,13 @@ class ChessBoard:
 								print('not in check')
 								self.print_board()
 								self.__attack_check(piece1,piece2)
+								self.__write_board()
 								return True
 							else:
 								self.board[location1] = self.board[location2]
 								self.board[location2] = None
 								self.board[location1].location = location1
+								return False
 
 					elif type(self.board[location1]) is Pawn:
 						if self.board[location1].movePiece(location2, self.board[location2]) == True:
@@ -323,6 +322,7 @@ class ChessBoard:
 							self.board[location2].location = location2
 							self.print_board()
 							self.__attack_check(piece1, piece2)
+							self.__write_board()
 							return True
 
 		print('Failed')
@@ -374,6 +374,23 @@ class ChessBoard:
 					out.append('o')
 				x += 1
 			print(out)
+
+	def __write_board(self):
+		self.__clear_board()
+		f = open('board.txt', 'a')
+		for i in self.board:
+			if i != None:
+				f.write(i.character)
+
+			else:
+				f.write('o')
+		f.close()
+
+	def __clear_board(self):
+		f = open('board.txt', 'w')
+		f.write('')
+		f.close()
+
 
 	def __attack_check(self, piece1, piece2):
 		if piece2 != None:
@@ -437,8 +454,22 @@ class player():
 		self.score = 0
 		self.colour = colour
 
-	def turn():
-		pass
+	def turn(self):
+		f = open('move.txt','rw')
+		f.write('listening')
+		content = f.read()
+		while content == 'listening':
+			content = f.read()
+
+		int(location1 = content[:4])
+		int(location2 = content[4:])
+		if board1.move(location1, location2) == False:
+			self.turn()
+
+		else:
+			f.write('')
+			f.close()
+
 
 
 #chess ai class
@@ -452,12 +483,19 @@ def game():
 	board1 = ChessBoard()
 	board1.print_board()
 	board1.move(0x10, 0x30)
+	input()
 	board1.move(0x60, 0x40)
+	input()
 	board1.move(0x11, 0x31)
+	input()
 	board1.move(0x64, 0x44)
+	input()
 	board1.move(0x73, 0x55)
+	input()
 	board1.move(0x75, 0x42)
+	input()
 	board1.move(0x42, 0x15)
+	input()
 
 if __name__ == '__main__':
 	game()
