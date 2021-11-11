@@ -288,6 +288,8 @@ class ChessBoard:
 			elif 0x60 <= i <= 0x67:
 				self.board[i] = Pawn('black', i)
 
+		self.__write_board()
+
 	def move(self, location1, location2):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
@@ -309,6 +311,7 @@ class ChessBoard:
 								self.__write_board()
 								return True
 							else:
+								print('in check')
 								self.board[location1] = self.board[location2]
 								self.board[location2] = None
 								self.board[location1].location = location1
@@ -455,19 +458,33 @@ class player():
 		self.colour = colour
 
 	def turn(self):
-		f = open('move.txt','rw')
+		f = open('move.txt','w')
 		f.write('listening')
+		f.close()
+		f = open('move.txt','r')
 		content = f.read()
-		while content == 'listening':
-			content = f.read()
+		f.close()
+		try:
+			while content == 'listening' or content == '':
+				f = open('move.txt','r')
+				content = f.read()
+			f.close()
 
-		int(location1 = content[:4])
-		int(location2 = content[4:])
-		if board1.move(location1, location2) == False:
-			self.turn()
+			print(content)
+			location1 = int(content[:4], base = 16)
+			location2 = int(content[4:], base = 16)
+			print(location2)
+			if board1.move(location1, location2) == False:
+				self.turn()
 
-		else:
-			f.write('')
+			else:
+				f = open('move.txt','w')
+				f.write('complete')
+				f.close()
+
+		except:
+			f = open('move.txt','w')
+			f.write('listening')
 			f.close()
 
 
@@ -482,20 +499,40 @@ def game():
 	global board1
 	board1 = ChessBoard()
 	board1.print_board()
-	board1.move(0x10, 0x30)
-	input()
-	board1.move(0x60, 0x40)
-	input()
-	board1.move(0x11, 0x31)
-	input()
-	board1.move(0x64, 0x44)
-	input()
-	board1.move(0x73, 0x55)
-	input()
-	board1.move(0x75, 0x42)
-	input()
-	board1.move(0x42, 0x15)
-	input()
+	valid = False
+	while valid == False:
+		menu = input('Input 1 to play against a player\nInput 2 to play against computer\n\n')
+		if menu == '1':
+			print('playing against human')
+			player1 = player('white')
+			player2 = player('black')
+			end = False
+			while end == False:
+				vaid = True
+				player1.turn()
+				player2.turn()
+
+		elif menu == '2':
+			valid = True
+			print('playing against computer')
+
+		else:
+			print('that is not an option')
+
+#	board1.move(0x10, 0x30)
+#	input()
+#	board1.move(0x60, 0x40)
+#	input()
+#	board1.move(0x11, 0x31)
+#	input()
+#	board1.move(0x64, 0x44)
+#	input()
+#	board1.move(0x73, 0x55)
+#	input()
+#	board1.move(0x75, 0x42)
+#	input()
+#	board1.move(0x42, 0x15)
+#	input()
 
 if __name__ == '__main__':
 	game()

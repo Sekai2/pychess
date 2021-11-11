@@ -1,4 +1,5 @@
 import pygame
+import time
 from misc import *
 
 def id_square(coordinate):
@@ -6,11 +7,18 @@ def id_square(coordinate):
 	y = coordinate[1]
 	x_index = x // 79
 	y_index = y // 79
-	index = x*y
+	index = x_index + y_index*16
+	print(coordinate)
+	print('x ' + str(x_index))
+	print('y ' + str(y_index))
+	print('board index = ' + str(index))
 	return hex(index)
 
 class gui():
 	def __init__(self):
+		self.coordinate1 = None
+		self.coordinate2 = None
+		self.press_count = 0
 
 		#place
 		pygame.init()
@@ -72,11 +80,32 @@ class gui():
 				if event.type == pygame.QUIT:
 					crashed = True
 
-			if pygame.mouse.get_pressed() != (False, False, False):
-				print(pygame.mouse.get_pos())
-
 			self.gameDisplay.blit(gui_board, (0,0))
 			self.__board_update()
+
+			self.__getmouse == 0
+
+			f = open('move.txt','r')
+			content = f.read()
+			if content == 'listening':
+
+				if self.press_count == 0:
+					if pygame.mouse.get_pressed() == (True, False, False):
+						self.__getmouse()
+
+				elif self.press_count == 2:
+					if pygame.mouse.get_pressed() == (True, False, False):
+						self.__getmouse()
+						self.press_count = 0
+						time.sleep(1)
+
+				elif self.press_count == 1:
+					#print(pygame.MOUSEBUTTONUP)
+					if event.type == pygame.MOUSEBUTTONUP:
+						print('2')
+						self.press_count = 2
+
+			
 			
 
 			pygame.display.update()
@@ -97,17 +126,34 @@ class gui():
 				elif board[i] == 'o':
 					pass
 
-	def __move(self):
-		f = open('move.txt','rw')
-		content = f.read()
-		while content == 'listening':
-	 		if pygame.mouse.get_pressed() == (True, False, False):
-	 			coordinate = pygame.mouse.get_pos()
-	 			index = id_square(coordinate)
-	 			f.write(index)
+	def __getmouse(self):
 
+		if self.coordinate1 == None:
+			print('pressed1')
+			self.coordinate1 = pygame.mouse.get_pos()
+			print('first coordinate:')
+			print(self.coordinate1)
+			self.press_count = 1
+			#while pygame.mouse.get_pressed() == (True, False, False):
+			#	print('a')
+			#self.__getmouse()
 
+		else:
+			print('pressed2')
+			self.coordinate2 = pygame.mouse.get_pos()
+			print('second coordinate:')
+			print(self.coordinate2)
+			self.__move(self.coordinate1, self.coordinate2)
 
+	def __move(self, coordinate1, coordinate2):
+		index1 = id_square(coordinate1)
+		index2 = id_square(coordinate2)
+		indexs = index1 + index2
+		f = open('move.txt','w')
+		f.write(indexs)
+		f.close()
+		self.coordinate1 = None
+		self.coordinate2 = None
 
 	def __quit(self):
 		pygame.quit()
