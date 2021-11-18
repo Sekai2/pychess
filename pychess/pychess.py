@@ -224,8 +224,15 @@ class King(Piece):
 			return False
 
 	def check_check(self):
-		if self.slide_check(self.location, 16) == True:
-			return True
+		for i in board1:
+			if i != None:
+				if i.colour != self.colour:
+					if i.movePiece(self.location) == True:
+						return False
+		return True
+
+#		if self.slide_check(self.location, 16) == True:
+#			return True
 
 	def slide_check(self, location, direction):
 		i = 0
@@ -233,6 +240,7 @@ class King(Piece):
 			print('a')
 			if board1.board[location] != None:
 				print('b')
+				print(board1.board[location].colour)
 				if board1.board[location].colour != self.colour:
 					print('c')
 					if board1.board[location].movePiece(self.location) == True:
@@ -304,6 +312,7 @@ class ChessBoard:
 							self.board[location2] = self.board[location1]
 							self.board[location1] = None
 							self.board[location2].location = location2
+							print(self.board[self.Wking_location].check_check())
 							if self.board[self.Wking_location].check_check() == True:
 								print('not in check')
 								self.print_board()
@@ -379,6 +388,7 @@ class ChessBoard:
 			print(out)
 
 	def __write_board(self):
+		print('writing')
 		self.__clear_board()
 		f = open('board.txt', 'a')
 		for i in self.board:
@@ -398,34 +408,6 @@ class ChessBoard:
 	def __attack_check(self, piece1, piece2):
 		if piece2 != None:
 			score_change(piece1, piece2)
-
-	def __attack_board(self,piece):
-		colour = piece.colour[0]
-		if type(piece) is Bishop:
-
-			location = piece.position
-			count = 0
-			direction = 1
-			diagonal = 15
-			while count != 4:
-				location = location + (direction * diagonal)
-				if self.board[location] == None:
-					self.board[location + 8] = colour
-
-				else:
-					count += 1
-					location = piece.position
-					if count == 1:
-						direction = -1
-
-					elif count == 2:
-						direction = 1
-						diagonal = 17
-
-					elif count == 3:
-						direction = -1
-		#this bit need coding
-				
 
 		if type(piece) is Rook:
 			

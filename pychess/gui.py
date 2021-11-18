@@ -45,29 +45,6 @@ class gui():
 		self.piece_list = [white_pawn, white_bishop, white_knight, white_rook, white_queen, white_king, black_pawn, black_bishop, black_knight, black_rook, black_queen, black_king]
 
 		self.gameDisplay.blit(gui_board, (0,0))
-		#self.gameDisplay.blit(black_rook, (9,10))
-		#self.gameDisplay.blit(black_bishop, (88,10))
-		#self.gameDisplay.blit(black_knight, (167,10))
-		#self.gameDisplay.blit(black_queen, (246,10))
-		#self.gameDisplay.blit(black_king, (325,10))
-		#self.gameDisplay.blit(black_knight, (404,10))
-		#self.gameDisplay.blit(black_bishop, (483,10))
-		#self.gameDisplay.blit(black_rook, (562,10))
-
-		#position = (9,90)
-		#for i in range(8):
-		#	x = (79 * (i+1)) - 70
-		#	position = (x,90)
-		#	self.gameDisplay.blit(black_pawn, (position))
-
-		#self.gameDisplay.blit(white_rook, (9,563))
-		#self.gameDisplay.blit(white_bishop, (88,563))
-		#self.gameDisplay.blit(white_knight, (167,563))
-		#self.gameDisplay.blit(white_queen, (246,563))
-		#self.gameDisplay.blit(white_king, (325,563))
-		#self.gameDisplay.blit(white_knight, (404,563))
-		#self.gameDisplay.blit(white_bishop, (483,563))
-		#self.gameDisplay.blit(white_rook, (562,563))
 
 		for i in range(8):
 			x = (79 * (i+1)) - 70
@@ -100,13 +77,9 @@ class gui():
 						time.sleep(1)
 
 				elif self.press_count == 1:
-					#print(pygame.MOUSEBUTTONUP)
 					if event.type == pygame.MOUSEBUTTONUP:
 						print('2')
 						self.press_count = 2
-
-			
-			
 
 			pygame.display.update()
 			clock.tick(60)
@@ -134,9 +107,6 @@ class gui():
 			print('first coordinate:')
 			print(self.coordinate1)
 			self.press_count = 1
-			#while pygame.mouse.get_pressed() == (True, False, False):
-			#	print('a')
-			#self.__getmouse()
 
 		else:
 			print('pressed2')
