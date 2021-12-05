@@ -1,5 +1,6 @@
 import time
 import os
+import math
 from misc import *
 from score import *
 
@@ -224,11 +225,18 @@ class King(Piece):
 			return False
 
 	def check_check(self):
-		for i in board1:
+		print('checking for check')
+		print(board1.board)
+		for i in board1.board:
+			print(i)
 			if i != None:
+				print(i.colour)
 				if i.colour != self.colour:
+					print(i)
 					if i.movePiece(self.location) == True:
+						print('In check fail')
 						return False
+		print('Check Check True')
 		return True
 
 #		if self.slide_check(self.location, 16) == True:
@@ -256,7 +264,9 @@ class King(Piece):
 			return True
 
 
-
+class FEN:
+	def __init__(self):
+		self.standard = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 #Board Class
 class ChessBoard:
@@ -266,6 +276,8 @@ class ChessBoard:
 			self.board.append(None)
 
 		#adding pieces
+
+#		load_FEN('standard')
 		#add white pieces
 		self.board[0] = Rook('white', 0)
 		self.board[1] = Knight('white', 1)
@@ -298,6 +310,20 @@ class ChessBoard:
 
 		self.__write_board()
 
+#	def load_Fen(self, mode):
+#		if mode == 'standard':
+#			for i in FEN.standard:
+#				if i == '/':
+#					self.board.append(None)
+#
+#				elif i == ' ':
+#					break
+#
+#				elif i == 'r':
+#					self.board.append(Rook('black', 0))
+#				elif i == 'n':
+#					self.board.append(Rook('black', 0))
+
 	def move(self, location1, location2):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
@@ -307,6 +333,7 @@ class ChessBoard:
 					print('checked pass 1')
 					if type(piece1) is not Pawn:
 						if piece1.movePiece(location2) == True:
+							print('not pawn')
 
 							print('checked pass 2')
 							self.board[location2] = self.board[location1]
@@ -314,11 +341,20 @@ class ChessBoard:
 							self.board[location2].location = location2
 							print(self.board[self.Wking_location].check_check())
 							if self.board[self.Wking_location].check_check() == True:
-								print('not in check')
-								self.print_board()
-								self.__attack_check(piece1,piece2)
-								self.__write_board()
-								return True
+								if self.board[self.Bking_location].check_check() == True:
+									print('not in check')
+									self.print_board()
+									self.__attack_check(piece1,piece2)
+									self.__write_board()
+									return True
+
+								else:
+									print('in check')
+									self.board[location1] = self.board[location2]
+									self.board[location2] = None
+									self.board[location1].location = location1
+									return False
+
 							else:
 								print('in check')
 								self.board[location1] = self.board[location2]
@@ -333,8 +369,8 @@ class ChessBoard:
 							self.board[location1] = None
 							self.board[location2].location = location2
 							self.print_board()
-							self.__attack_check(piece1, piece2)
 							self.__write_board()
+							self.__attack_check(piece1, piece2)
 							return True
 
 		print('Failed')
@@ -398,6 +434,7 @@ class ChessBoard:
 			else:
 				f.write('o')
 		f.close()
+		print('written')
 
 	def __clear_board(self):
 		f = open('board.txt', 'w')
@@ -439,6 +476,13 @@ class player():
 		self.score = 0
 		self.colour = colour
 
+	def turn():
+		pass
+
+class human(player):
+	def __init__(self):
+		player.__init__(self)
+
 	def turn(self):
 		f = open('move.txt','w')
 		f.write('listening')
@@ -469,13 +513,41 @@ class player():
 			f.write('listening')
 			f.close()
 
-
-
 #chess ai class
 class computer(player):
 	def __init__(self):
 		player.__init__(self)
 		pass
+
+	def turn(self):
+		pass
+
+	def evaluate(self):
+		if self.colour == 'white':
+			multiplier = 1
+
+		elif self.colour == 'black':
+			multiplier = -1
+
+		materialScore = materialEval()
+		mobilityScore = mobilityEval()
+		score = (materialScore + mobilityScore) * multiplier
+
+	def materialEval(self):
+		pass
+
+	def mobilityEval(self):
+		pass
+
+	def minimax(depth, node, maxing, values, max_depth):
+		if depth == max_depth:
+			return values[node]
+
+		if maxing:
+			return max(minimax(depth + 1, node * 2, False, values, max_depth),minimax(depth + 1, node * 2 + 1, False, values, max_depth))
+
+		else:
+			return min(minimax(depth + 1, node * 2, True, values, max_depth),minimax(depth + 1, node * 2 + 1, True, values, max_depth))
 
 def game():
 	global board1
@@ -486,8 +558,8 @@ def game():
 		menu = input('Input 1 to play against a player\nInput 2 to play against computer\n\n')
 		if menu == '1':
 			print('playing against human')
-			player1 = player('white')
-			player2 = player('black')
+			player1 = human('white')
+			player2 = human('black')
 			end = False
 			while end == False:
 				vaid = True
@@ -500,21 +572,6 @@ def game():
 
 		else:
 			print('that is not an option')
-
-#	board1.move(0x10, 0x30)
-#	input()
-#	board1.move(0x60, 0x40)
-#	input()
-#	board1.move(0x11, 0x31)
-#	input()
-#	board1.move(0x64, 0x44)
-#	input()
-#	board1.move(0x73, 0x55)
-#	input()
-#	board1.move(0x75, 0x42)
-#	input()
-#	board1.move(0x42, 0x15)
-#	input()
 
 if __name__ == '__main__':
 	game()
