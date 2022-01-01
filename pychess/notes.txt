@@ -1,2 +1,31 @@
 notes:
-straight check can be optimized using while loop
+straight check can be optimized using recursion
+
+current jobs:
+	fix the function for updating board after moving a non pawn piece
+	complete FEN notation
+	timer
+	create update miscData function
+
+to do:
+	complete FEN notation validity check
+	create code for turning board into FEN notation
+	create ordering function for pieces
+	create board evaluation functions
+	create timer
+
+complete:
+	board giu
+	
+miscData format:
+	*time*/
+
+Overview of features for decomposition:
+
+General Features:
+
+	FEN notation
+
+Algorithms:
+	
+	MinMax

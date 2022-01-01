@@ -20,12 +20,28 @@ class gui():
 		self.coordinate2 = None
 		self.press_count = 0
 
+		#colours
+		self.black = (0, 0, 0)
+		self.grey = (55, 55, 55)
+		self.white = (255, 255, 255)
+
 		#place
 		pygame.init()
-		self.gameDisplay = pygame.display.set_mode((631,632))
+		icon = pygame.image.load('assets/logo.png')
+		pygame.display.set_icon(icon)
+
+		self.gameDisplay = pygame.display.set_mode((750,632))
+		self.gameDisplay.fill(self.white)
+		#board (coordinate), (dimensions): (0,0),(631,632)
+		#board (coordinate), (dimensions): (631,632)
+
+
 		pygame.display.set_caption('PyChess')
 		clock = pygame.time.Clock()
 		gui_board = pygame.image.load('assets/board.png')
+
+		#defining fonts
+
 
 		#load pieces
 		white_pawn = pygame.image.load('assets/wp.png')
@@ -59,6 +75,7 @@ class gui():
 
 			self.gameDisplay.blit(gui_board, (0,0))
 			self.__board_update()
+			self.__updateBar()
 
 			self.__getmouse == 0
 
@@ -100,20 +117,20 @@ class gui():
 					pass
 
 	def __getmouse(self):
+		if pygame.mouse.get_pos()[0] < 632 and pygame.mouse.get_pos()[1] < 633:
+			if self.coordinate1 == None:
+				print('pressed1')
+				self.coordinate1 = pygame.mouse.get_pos()
+				print('first coordinate:')
+				print(self.coordinate1)
+				self.press_count = 1
 
-		if self.coordinate1 == None:
-			print('pressed1')
-			self.coordinate1 = pygame.mouse.get_pos()
-			print('first coordinate:')
-			print(self.coordinate1)
-			self.press_count = 1
-
-		else:
-			print('pressed2')
-			self.coordinate2 = pygame.mouse.get_pos()
-			print('second coordinate:')
-			print(self.coordinate2)
-			self.__move(self.coordinate1, self.coordinate2)
+			else:
+				print('pressed2')
+				self.coordinate2 = pygame.mouse.get_pos()
+				print('second coordinate:')
+				print(self.coordinate2)
+				self.__move(self.coordinate1, self.coordinate2)
 
 	def __move(self, coordinate1, coordinate2):
 		index1 = id_square(coordinate1)
@@ -124,6 +141,14 @@ class gui():
 		f.close()
 		self.coordinate1 = None
 		self.coordinate2 = None
+
+	def __updateBar(self):
+		f = open('UCode.txt', 'r')
+		content = f.read()
+		f.close()
+		font = pygame.font.SysFont('Calibri', 50)
+		img = font.render('90:30', True, self.grey)
+		self.gameDisplay.blit(img, (631,20))
 
 	def __quit(self):
 		pygame.quit()
