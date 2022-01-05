@@ -22,7 +22,7 @@ class gui():
 
 		#colours
 		self.black = (0, 0, 0)
-		self.grey = (55, 55, 55)
+		self.grey = (27, 25, 22)
 		self.white = (255, 255, 255)
 
 		#place
@@ -30,8 +30,8 @@ class gui():
 		icon = pygame.image.load('assets/logo.png')
 		pygame.display.set_icon(icon)
 
-		self.gameDisplay = pygame.display.set_mode((750,632))
-		self.gameDisplay.fill(self.white)
+		self.gameDisplay = pygame.display.set_mode((900,632))
+		self.gameDisplay.fill(self.grey)
 		#board (coordinate), (dimensions): (0,0),(631,632)
 		#board (coordinate), (dimensions): (631,632)
 
@@ -135,6 +135,12 @@ class gui():
 	def __move(self, coordinate1, coordinate2):
 		index1 = id_square(coordinate1)
 		index2 = id_square(coordinate2)
+		if len(index1) < 4:
+			index1 = index1[:2] + '0' + index1[2]
+
+		if len(index2) < 4:
+			index2 = index2[:2] + '0' + index1[2]
+			
 		indexs = index1 + index2
 		f = open('move.txt','w')
 		f.write(indexs)
