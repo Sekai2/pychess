@@ -25,6 +25,9 @@ class Piece():
 		return(squares)
 
 	def id_direction(self, moved):
+		print(self.ADSquares)
+		print('moved:')
+		print(moved)
 		if moved in self.ADSquares:
 			direction = moved - self.location
 			self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
@@ -340,7 +343,7 @@ class ChessBoard:
 		self.slideLocations = []
 		for i in self.board:
 			if type(i) == Queen or type(i) == Bishop or type(i) == Rook:
-				self.slideLocations.append(board.index(i))
+				self.slideLocations.append(self.board.index(i))
 
 		self.__write_board()
 
@@ -350,9 +353,16 @@ class ChessBoard:
 				i.update_ADSquares()
 
 	def update_locations(self, piece, location1):
+		print('updating locations')
+		print(piece)
+		print(location1)
 		if type(piece) == Bishop or type(piece) == Rook or type(piece) == Queen:
+			print('is sliding')
 			self.slideLocations.pop(self.slideLocations.index(location1))
 			self.slideLocations.append(piece.location)
+
+		else:
+			print('is not sliding')
 
 	def move(self, location1, location2, colour):
 		piece1 = self.board[location1]
@@ -368,9 +378,11 @@ class ChessBoard:
 								self.board[location1] = None
 								self.board[location2].location = location2
 								self.board[location2].update_ADSquares()
-								self.board[location2].update_locations()
+								self.update_locations(self.board[location2], location1)
+								print('slide locations:')
+								print(self.slideLocations)
 								for i in self.slideLocations:
-									i.id_direction(self.board[location2])
+									self.board[i].id_direction(self.board[location2])
 								self.print_board()
 								self.__write_board()
 								self.__attack_check(piece1,piece2)
@@ -383,7 +395,6 @@ class ChessBoard:
 									self.board[location1] = None
 									self.board[location2].location = location2
 									self.board[location2].update_ADSquares()
-									self.board[location2].update_locations(piece1, location1)
 									self.print_board()
 									self.__write_board()
 									self.__attack_check(piece1,piece2)
