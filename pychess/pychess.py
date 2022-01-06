@@ -27,6 +27,18 @@ class Piece():
 	def id_direction(self, moved):
 		if moved in self.ADSquares:
 			direction = moved - self.location
+			#help
+
+
+
+
+
+
+
+
+
+
+			
 			self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
 
 class Pawn(Piece):
@@ -69,14 +81,24 @@ class Pawn(Piece):
 		return False
 
 	def enPassant(self, destination):
+		print('enPassant check')
+		if self.colour == 'white':
+			rank = 3
+			direction = -1
+
+		if self.colour == 'black':
+			rank = 4
+			direction = 1
+
 		adjacent = [self.location + 1, self.location -1]
 		for i in adjacent:
 			if board1.board[i].colour != self.colour:
 				if type(board1.board[i]) == Pawn:
-					if board_rank(self.location) == 5 or board_rank(self.location) == 4:
+					if board_rank(self.location) == rank:
 						if board_file(destination) == board_file(i):
-							return True
-		return False
+							if destination == (i + 16 * direction):
+								return i
+		return 0
 
 
 class Knight(Piece):
@@ -394,6 +416,7 @@ class ChessBoard:
 								print(self.slideLocations)
 								for i in self.slideLocations:
 									self.board[i].id_direction(location1)
+									self.board[i].id_direction(location2)
 								self.print_board()
 								self.__write_board()
 								self.__attack_check(piece1,piece2)
@@ -408,6 +431,22 @@ class ChessBoard:
 									self.board[location2].update_ADSquares()
 									for i in self.slideLocations:
 										self.board[i].id_direction(location1)
+										self.board[i].id_direction(location2)
+									self.print_board()
+									self.__write_board()
+									return True
+
+								elif piece1.enPassant(location2) != 0:
+									print('enPassant')
+									take = piece1.enPassant(location2)
+									self.board[take] = None
+									self.board[location2] = self.board[location1]
+									self.board[location1] = None
+									self.board[location2].location = location2
+									self.board[location2].update_ADSquares()
+									for i in self.slideLocations:
+										self.board[i].id_direction(location1)
+										self.board[i].id_direction(location2)
 									self.print_board()
 									self.__write_board()
 									self.__attack_check(piece1,piece2)
@@ -424,6 +463,7 @@ class ChessBoard:
 									self.board[location2].update_ADSquares()
 									for i in self.slideLocations:
 										self.board[i].id_direction(location1)
+										self.board[i].id_direction(location2)
 									self.print_board()
 									self.__write_board()
 									self.__attack_check(piece1,piece2)
@@ -432,9 +472,6 @@ class ChessBoard:
 		print('Failed')
 		self.print_board()
 		return False
-
-	def reveal_update(self, location):
-		pass
 
 	def __selfTake(self, location1, location2):
 		if self.board[location1] != None:
