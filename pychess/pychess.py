@@ -25,9 +25,6 @@ class Piece():
 		return(squares)
 
 	def id_direction(self, moved):
-		print(self.ADSquares)
-		print('moved:')
-		print(moved)
 		if moved in self.ADSquares:
 			direction = moved - self.location
 			self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
@@ -41,16 +38,23 @@ class Pawn(Piece):
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
+		print('updating pawn')
 		if self.colour == 'white':
-			direction = 1
+			direction = -1
 
 		else:
-			direction = -1
+			direction = 1
 
 		self.ADSquares = [(self.location + (16*direction) - 1),(self.location + (16*direction) + 1)]
 
+		
+
 	def movePawn(self, destination):
-		if board_file(self.location) == board_file(self.location):
+		if self.colour == 'white':
+			if negcheck(self.location - destination) == True:
+				return False
+
+		if board_file(self.location) == board_file(destination):
 			if board_rank(self.location) == 1:
 				if board_rank(destination) - board_rank(self.location) <= 2:
 					return True
@@ -62,8 +66,17 @@ class Pawn(Piece):
 			elif abs(board_rank(destination) - board_rank(self.location)) == 1:
 				return True
 
-			else:
-				return False
+		return False
+
+	def enPassant(self, destination):
+		adjacent = [self.location + 1, self.location -1]
+		for i in adjacent:
+			if board1.board[i].colour != self.colour:
+				if type(board1.board[i]) == Pawn:
+					if board_rank(self.location) == 5 or board_rank(self.location) == 4:
+						if board_file(destination) == board_file(i):
+							return True
+		return False
 
 
 class Knight(Piece):
@@ -353,9 +366,6 @@ class ChessBoard:
 				i.update_ADSquares()
 
 	def update_locations(self, piece, location1):
-		print('updating locations')
-		print(piece)
-		print(location1)
 		if type(piece) == Bishop or type(piece) == Rook or type(piece) == Queen:
 			print('is sliding')
 			self.slideLocations.pop(self.slideLocations.index(location1))
@@ -367,9 +377,10 @@ class ChessBoard:
 	def move(self, location1, location2, colour):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
+		print(piece1.colour)
 		if piece1 != None:
 			if self.offBoardCheck(location2) == True:
-				if piece1.colour != colour:
+				if piece1.colour == colour:
 					if self.__selfTake(location1, location2) == True:
 						print(piece1.ADSquares)
 						if type(piece1) is not Pawn:
@@ -382,7 +393,7 @@ class ChessBoard:
 								print('slide locations:')
 								print(self.slideLocations)
 								for i in self.slideLocations:
-									self.board[i].id_direction(self.board[location2])
+									self.board[i].id_direction(location1)
 								self.print_board()
 								self.__write_board()
 								self.__attack_check(piece1,piece2)
@@ -395,6 +406,24 @@ class ChessBoard:
 									self.board[location1] = None
 									self.board[location2].location = location2
 									self.board[location2].update_ADSquares()
+									for i in self.slideLocations:
+										self.board[i].id_direction(location1)
+									self.print_board()
+									self.__write_board()
+									self.__attack_check(piece1,piece2)
+									return True
+
+							else:
+								print('attacking')
+								print(piece1.ADSquares)
+								print(location2)
+								if location2 in piece1.ADSquares:
+									self.board[location2] = self.board[location1]
+									self.board[location1] = None
+									self.board[location2].location = location2
+									self.board[location2].update_ADSquares()
+									for i in self.slideLocations:
+										self.board[i].id_direction(location1)
 									self.print_board()
 									self.__write_board()
 									self.__attack_check(piece1,piece2)
@@ -514,6 +543,7 @@ class human(player):
 		self.colour = colour
 
 	def turn(self):
+		print(self.colour + '\'s turn')
 		f = open('move.txt','w')
 		f.write('listening')
 		f.close()
