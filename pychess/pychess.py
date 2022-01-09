@@ -14,10 +14,18 @@ class Piece():
 
 	#diagonal sliding for queens and bishops
 
+	def __clean(self):
+		for i in self.ADSquares:
+			 if self.ADSquares.count(i) > 1:
+			 	for j in range(self.ADSquares.count(i)-1):
+			 		self.ADSquares.remove(i)
+
 	def update_slide(self, location, direction, squares):
 		location = location + direction
 		if board1.offBoardCheck(location + direction) == True:
 			if board1.board[location] == None:
+				if location in squares:
+					squares.remove(location)
 				squares.append(location)
 				self.update_slide(location, direction, squares)
 			squares.append(location)
@@ -25,21 +33,35 @@ class Piece():
 		return(squares)
 
 	def id_direction(self, moved):
+		self.__clean()
 		if moved in self.ADSquares:
 			direction = moved - self.location
-			#help
 
-
-
-
-
-
-
-
-
-
-			
 			self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
+
+	def block_update(self, moved):
+		print('updating for blocked paths:')
+		print(self)
+		direction = moved-self.location
+		if direction == 0:
+			return
+		line = moved // abs(direction)
+		copy = self.ADSquares
+		print(copy)
+
+		for i in copy:
+			if i // abs(direction) == line:
+				if negcheck(direction) == False:
+					if i > moved:
+						print(i)
+						self.ADSquares.remove(i)
+
+				else:
+					if i < moved:
+						print(i)
+						self.ADSquares.remove(i)
+
+		print('reached end')
 
 class Pawn(Piece):
 	def __init__(self, colour, location):
@@ -399,7 +421,7 @@ class ChessBoard:
 	def move(self, location1, location2, colour):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
-		print(piece1.colour)
+		print('piece 1:')
 		if piece1 != None:
 			if self.offBoardCheck(location2) == True:
 				if piece1.colour == colour:
@@ -417,6 +439,7 @@ class ChessBoard:
 								for i in self.slideLocations:
 									self.board[i].id_direction(location1)
 									self.board[i].id_direction(location2)
+									self.board[i].block_update(location2)
 								self.print_board()
 								self.__write_board()
 								self.__attack_check(piece1,piece2)
@@ -432,6 +455,7 @@ class ChessBoard:
 									for i in self.slideLocations:
 										self.board[i].id_direction(location1)
 										self.board[i].id_direction(location2)
+										self.board[i].block_update(location2)
 									self.print_board()
 									self.__write_board()
 									return True
@@ -447,6 +471,7 @@ class ChessBoard:
 									for i in self.slideLocations:
 										self.board[i].id_direction(location1)
 										self.board[i].id_direction(location2)
+										self.board[i].block_update(location2)
 									self.print_board()
 									self.__write_board()
 									self.__attack_check(piece1,piece2)
@@ -464,6 +489,7 @@ class ChessBoard:
 									for i in self.slideLocations:
 										self.board[i].id_direction(location1)
 										self.board[i].id_direction(location2)
+										self.board[i].block_update(location2)
 									self.print_board()
 									self.__write_board()
 									self.__attack_check(piece1,piece2)
@@ -600,6 +626,7 @@ class human(player):
 			print(location1)
 			print(location2)
 			if board1.move(location1, location2, self.colour) == False:
+				print('wrong move')
 				self.turn()
 
 			else:
