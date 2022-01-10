@@ -5,7 +5,7 @@ import math
 from misc import *
 from score import *
 
-#piece class
+#parent class for all piece types
 class Piece():
 	def __init__(self, colour, location):
 		self.colour = colour
@@ -15,14 +15,16 @@ class Piece():
 	#diagonal sliding for queens and bishops
 
 	def __clean(self):
+		#deletes repeats from ADSquares
 		for i in self.ADSquares:
 			 if self.ADSquares.count(i) > 1:
 			 	for j in range(self.ADSquares.count(i)-1):
 			 		self.ADSquares.remove(i)
 
 	def update_slide(self, location, direction, squares):
+		#updates ADSqures for a single line/direction
 		location = location + direction
-		if board1.offBoardCheck(location + direction) == True:
+		if board1.offBoardCheck(location) == True:
 			if board1.board[location] == None:
 				if location in squares:
 					squares.remove(location)
@@ -33,36 +35,28 @@ class Piece():
 		return(squares)
 
 	def id_direction(self, moved):
-		self.__clean()
+		#identifies the between piece and a location, used to identify direction that needs to be updated for a sliding piece
 		if moved in self.ADSquares:
 			direction = moved - self.location
 
 			self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
 
-	def block_update(self, moved):
-		print('updating for blocked paths:')
-		print(self)
-		direction = moved-self.location
-		if direction == 0:
-			return
-		line = moved // abs(direction)
-		copy = self.ADSquares
-		print(copy)
+		self.__clean()
 
-		for i in copy:
-			if i // abs(direction) == line:
-				if negcheck(direction) == False:
-					if i > moved:
-						print(i)
-						self.ADSquares.remove(i)
+	def block_update(self, location1, location2):
+		#updates ADSquares for sliding pieces when blocking pieces are moved or pieces are moved into slide line
+		print('block_update')
+		if location2 in self.ADSquares:
+			print('blocked')
+			self.update_ADSquares()
 
-				else:
-					if i < moved:
-						print(i)
-						self.ADSquares.remove(i)
+		else:
+			print('not blocked')
+			self.id_direction(location1)
+			self.id_direction(location2)
 
-		print('reached end')
-
+#Note: ADSqaures(variable) stores all the squares which a piece attacks
+#      update_ADSquares(method) updates the ADSqaures for a piece
 class Pawn(Piece):
 	def __init__(self, colour, location):
 		Piece.__init__(self, colour, location)
@@ -84,6 +78,7 @@ class Pawn(Piece):
 		
 
 	def movePawn(self, destination):
+		#pawn specific method for normal pawn movement
 		if self.colour == 'white':
 			if negcheck(self.location - destination) == True:
 				return False
@@ -103,6 +98,7 @@ class Pawn(Piece):
 		return False
 
 	def enPassant(self, destination):
+		#pawn specific method for moving a pawn using the en passant rule
 		print('enPassant check')
 		if self.colour == 'white':
 			rank = 3
@@ -193,33 +189,6 @@ class King(Piece):
 		if self.colour == 'white':
 			self.character = self.character.lower()
 
-	def movePiece(self, destination):
-		print('king selected')
-		if abs(board_file(destination) - board_file(self.location)) <= 1:
-			if abs(board_rank(destination) - board_rank(self.location)) <= 1:
-				return True
-
-			else:
-				return False
-
-		else:
-			return False
-
-	def check_check(self):
-		print('checking for check')
-		for i in board1.board:
-			if i != None:
-				if i.colour != self.colour:
-					print(i.movePiece(self.location))
-					if i.movePiece(self.location) == True:
-						print('In check fail')
-						return False
-
-					else:
-						print(str(type(i)) + ' cannot attack king')
-		print('Check Check True')
-		return True
-
 	def update_ADSquares(self):
 		print('\nupdating King')
 		self.ADSquares = []
@@ -227,29 +196,8 @@ class King(Piece):
 		for i in directions:
 			self.ADSquares.append(self.location + i)
 
-	def slide_check(self, location, direction):
-		i = 0
-		if board1.offBoardCheck(location) == True:
-			print('a')
-			if board1.board[location] != None:
-				print('b')
-				print(board1.board[location].colour)
-				if board1.board[location].colour != self.colour:
-					print('c')
-					if board1.board[location].movePiece(self.location) == True:
-						return False
 
-			else:
-				print('c')
-				next_location = location + direction
-				self.check_straight(next_location, direction)
-
-		else:
-			print('c')
-			return True
-
-
-class FEN:
+class FEN():
 	def __init__(self):
 		self.standard = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 		self.quantity = 0
@@ -387,7 +335,7 @@ class FEN:
 		pass
 
 #Board Class
-class ChessBoard:
+class ChessBoard():
 	def __init__(self):
 		FEN_code = FEN()
 		self.board = []
@@ -418,10 +366,32 @@ class ChessBoard:
 		else:
 			print('is not sliding')
 
+	def __checkCheck(self, piece):
+		#initiating check for check
+		if piece.colour == 'white':
+			if self.Bking_location in piece.ADSquares:
+				return True
+
+		else:
+			if self.Wking_location in piece.ADSquares:
+				return True
+
+		return False
+
+	def __revert(self, location1, location2, boardcopy, slideLocationscopy):
+		self.board = boardcopy
+		self.board[location1].location = location1
+		self.board[location1].uopdate_ADSquares()
+		self.slideLocations = slideLocationscopy
+		self.board[i].block_update(location2, location1)
+
+
 	def move(self, location1, location2, colour):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
-		print('piece 1:')
+		boardcopy = self.board
+		slideLocationscopy = self.slideLocations
+
 		if piece1 != None:
 			if self.offBoardCheck(location2) == True:
 				if piece1.colour == colour:
@@ -434,12 +404,22 @@ class ChessBoard:
 								self.board[location2].location = location2
 								self.board[location2].update_ADSquares()
 								self.update_locations(self.board[location2], location1)
+								if type(piece1) == King:
+									#updating king index
+									if piece1.colour == 'white':
+										self.Wking_location = location2
+
+									else:
+										self.Bking_location = location2
+
 								print('slide locations:')
 								print(self.slideLocations)
 								for i in self.slideLocations:
-									self.board[i].id_direction(location1)
-									self.board[i].id_direction(location2)
-									self.board[i].block_update(location2)
+									self.board[i].block_update(location1, location2)
+									if self.__checkCheck(self.board[i]) == True:
+										self.__revert(location1, location2, boardcopy, slideLocationscopy)
+										return False
+
 								self.print_board()
 								self.__write_board()
 								self.__attack_check(piece1,piece2)
@@ -453,9 +433,11 @@ class ChessBoard:
 									self.board[location2].location = location2
 									self.board[location2].update_ADSquares()
 									for i in self.slideLocations:
-										self.board[i].id_direction(location1)
-										self.board[i].id_direction(location2)
-										self.board[i].block_update(location2)
+										self.board[i].block_update(location1, location2)
+										if self.__checkCheck(self.board[i]) == True:
+											self.__revert(location1, location2, boardcopy, slideLocationscopy)
+											return False
+										print('\n')
 									self.print_board()
 									self.__write_board()
 									return True
@@ -469,9 +451,11 @@ class ChessBoard:
 									self.board[location2].location = location2
 									self.board[location2].update_ADSquares()
 									for i in self.slideLocations:
-										self.board[i].id_direction(location1)
-										self.board[i].id_direction(location2)
-										self.board[i].block_update(location2)
+										self.board[i].block_update(location1, location2)
+										if self.__checkCheck(self.board[i]) == True:
+											self.__revert(location1, location2, boardcopy, slideLocationscopy)
+											return False
+										print('\n')
 									self.print_board()
 									self.__write_board()
 									self.__attack_check(piece1,piece2)
@@ -487,13 +471,17 @@ class ChessBoard:
 									self.board[location2].location = location2
 									self.board[location2].update_ADSquares()
 									for i in self.slideLocations:
-										self.board[i].id_direction(location1)
-										self.board[i].id_direction(location2)
-										self.board[i].block_update(location2)
+										self.board[i].block_update(location1, location2)
+										if self.__checkCheck(self.board[i]) == True:
+											self.__revert(location1, location2, boardcopy, slideLocationscopy)
+											return False
+										print('\n')
 									self.print_board()
 									self.__write_board()
 									self.__attack_check(piece1,piece2)
 									return True
+
+
 
 		print('Failed')
 		self.print_board()
