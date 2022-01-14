@@ -461,14 +461,14 @@ class ChessBoard():
 				if piece.Qcastling == True:
 					if piece.location in self.board[112].ADSquares:
 						print('castling')
-						__update_castle(0x72, 0x73)
+						__update_castle(0x72, 0x70, 0x73)
 						return True
 
 			elif location2 == 0x76:
 				if piece.Kcastling == True:
 					if piece.location in self.board[119].ADSquares:
 						print('castling')
-						__update_castle(0x76, 0x75)
+						__update_castle(0x76, 0x77, 0x75)
 						return True
 
 		elif piece.colour == 'black':
@@ -476,21 +476,39 @@ class ChessBoard():
 				if piece.Qcastling == True:
 					if piece.location in self.board[0].ADSquares:
 						print('castling')
-						__update_castle(0x02, 0x03)
+						__update_castle(0x02, 0x00, 0x03)
 						return True
 
 			elif location2 == 0x06:
 				if piece.Kcastling == True:
 					if piece.location in self.board[7].ADSquares:
 						print('castling')
-						__update_castle(0x06, 0x05)
+						__update_castle(0x06, 0x07, 0x05)
 						return True
 
 		print('cannot castle')
 		return False
 
-	def __update_castle(self, Klocation, Rlocation):
+	def __update_castle(self, Klocation, Rlocation1, Rlocation2):
+		print('updating for castling')
+		self.board[Klocation] = self.board[self.Wking_location]
+		self.board[self.Wking_location] = None
+		self.board[Klocation].location = Klocation
+		self.board[Rlocation2] = self.board[Rlocation1]
+		self.board[Rlocation1] = None
+		self.board[Klocation].update_ADSquares()
+		self.board[Rlocation2].update_ADSquares()
 
+		self.Wking_location = Klocation
+
+		for i in self.slideLocations:
+			print(self.board[i])
+			self.board[i].block_update(location1, location2)
+
+		for i in self.board:
+			if i != None:
+				if self.__checkCheck(i) == colour:
+					### need fixxx
 
 	def move(self, location1, location2, colour):
 		piece1 = self.board[location1]
