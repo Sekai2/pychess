@@ -17,3 +17,11 @@ def abs(x):
 	if negcheck(x) == True:
 		x = -1 * x
 	return x
+
+def file_letter(i):
+	rank = 'abcdefgh'
+	return rank[board_file(i)]
+
+def rank_num(i):
+	num = '87654321'
+	return str(int(num[board_rank(i)]))

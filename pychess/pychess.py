@@ -22,6 +22,8 @@ class Piece():
 			 		self.ADSquares.remove(i)
 
 	def update_slide(self, location, direction, squares):
+		print(squares)
+
 		#updates ADSqures for a single line/direction
 		location = location + direction
 		if board1.offBoardCheck(location) == True:
@@ -38,22 +40,34 @@ class Piece():
 		#identifies the between piece and a location, used to identify direction that needs to be updated for a sliding piece
 		if moved in self.ADSquares:
 			direction = moved - self.location
+			multiplier = direction // abs(direction)
+			if abs(direction) < 7:
+				direction = multiplier
+
+			elif self.location % 16 == moved % 16:
+				direction = 16
+				direction = direction * multiplier
+
+			elif self.location % 17 == moved % 17:
+				direction = 17
+				direction = direction * multiplier
+
+			elif self.location % 15 == moved % 15:
+				direction = 15
+				direction = direction * multiplier
 
 			self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
+			print(self.ADSquares)
 
 		self.__clean()
 
 	def block_update(self, location1, location2):
 		#updates ADSquares for sliding pieces when blocking pieces are moved or pieces are moved into slide line
-		print('block_update')
 		if location2 in self.ADSquares:
-			print('blocked')
 			self.update_ADSquares()
 
 		else:
-			print('not blocked')
 			self.id_direction(location1)
-			self.id_direction(location2)
 
 #Note: ADSqaures(variable) stores all the squares which a piece attacks
 #      update_ADSquares(method) updates the ADSqaures for a piece
@@ -360,12 +374,8 @@ class ChessBoard():
 
 	def update_locations(self, piece, location1):
 		if type(piece) == Bishop or type(piece) == Rook or type(piece) == Queen:
-			print('is sliding')
 			self.slideLocations.pop(self.slideLocations.index(location1))
 			self.slideLocations.append(piece.location)
-
-		else:
-			print('is not sliding')
 
 	def __checkCheck(self, piece):
 		#initiating check for check
@@ -407,8 +417,17 @@ class ChessBoard():
 
 
 		for i in self.slideLocations:
+			print('\n\n')
 			print(self.board[i])
+			print(self.board[i].colour)
+			print(file_letter(i) + rank_num(i))
+			print(self.board[i].ADSquares)
 			self.board[i].block_update(location1, location2)
+			squares = []
+			for i in self.board[i].ADSquares:
+				squares.append(file_letter(i) + rank_num(i))
+
+			print(squares)
 
 		self.print_board()
 
@@ -456,6 +475,7 @@ class ChessBoard():
 		return True
 
 	def castle(self, piece, location2):
+		print('castlinggggggggg\n\n\n\n\n\n\n\n\n\n\n\n\n')
 		if piece.colour == 'white':
 			if location2 == 0x72:
 				if piece.Qcastling == True:
@@ -465,7 +485,11 @@ class ChessBoard():
 						return True
 
 			elif location2 == 0x76:
+				print('yeeeeee')
 				if piece.Kcastling == True:
+					print('wooooooooooo')
+					print(piece.location)
+					print(self.board[119].ADSquares)
 					if piece.location in self.board[119].ADSquares:
 						print('castling')
 						__update_castle(0x76, 0x77, 0x75)
@@ -507,8 +531,27 @@ class ChessBoard():
 
 		for i in self.board:
 			if i != None:
-				if self.__checkCheck(i) == colour:
-					### need fixxx
+				if self.__checkCheck(i) == self.board[Klocation].colour:
+					self.__revert_castle(Klocation, Rlocation1, Rlocation2)
+
+	def __revert_castle(self, Klocation, Rlocation1, Rlocation2):
+		print('reverting castling')
+		if self.board[self.Klocation].colour == 'white':
+			location = 116
+			self.Wking_location = 116
+
+		else:
+			location = 4
+			self.Bking_location = 4
+
+		self.board[location] = self.board[Klocation]
+		self.board[Klocation] = None
+		self.board[location].location = location
+		self.Rlocation1 = self.Rlocation2
+		self.Rlocation2 = None
+		self.board[location].update_ADSquares()
+		self.board[Rlocation1].update_ADSquares()
+
 
 	def move(self, location1, location2, colour):
 		piece1 = self.board[location1]
@@ -522,11 +565,17 @@ class ChessBoard():
 					if self.__selfTake(location1, location2) == True:
 						if type(piece1) is not Pawn:
 							if type(piece1) == King:
+								print('I\'m the kingggggg')
+								print(location2 in piece1.ADSquares)
 								if location2 in piece1.ADSquares:
+									print('bbbbbbbbbbbbbbbbbbbbbbb')
 									return self.__update_Board(location1, location2, colour, piece1, piece2, boardcopy, slideLocationscopy)
 
-								elif self.castle(piece, location2) == True:
+								elif self.castle(piece1, location2) == True:
+									print('aaaaaaaaaaaaaaaaaaaaaaa')
 									return self.__update_Board(location1, location2, colour, piece1, piece2, boardcopy, slideLocationscopy)
+
+								print('reached enddddddddddddddddddddddddddddddddd')
 
 							elif location2 in piece1.ADSquares:
 								return self.__update_Board(location1, location2, colour, piece1, piece2, boardcopy, slideLocationscopy)
@@ -581,8 +630,6 @@ class ChessBoard():
 		if negcheck(hexsquare) == False:
 			if (hexsquare & 0x88) == 0:
 				return True
-
-		print('off board error')
 		return False
 
 	def print_board(self):
