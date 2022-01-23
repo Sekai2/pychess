@@ -390,16 +390,17 @@ class ChessBoard():
 				return 'white'
 		return False
 
-	def __revert(self, location1, location2, boardcopy, slideLocationscopy):
+	def __revert(self, location1, location2, slideLocationscopy):
 		print('reverting')
-		self.board = boardcopy
+		self.board[location1] = self.board[location2]
 		self.board[location1].location = location1
-		self.board[location1].uopdate_ADSquares()
+		self.board[location2] = None
+		self.board[location1].update_ADSquares()
 		self.slideLocations = slideLocationscopy
-		self.board[i].block_update(location2, location1)
-		print('I am here haha')
+		for i in self.slideLocations:
+			self.board[i].block_update(location2, location1)
 
-	def __update_Board(self, location1, location2, colour, piece1, piece2, boardcopy, slideLocationscopy):
+	def __update_Board(self, location1, location2, colour, piece1, piece2, slideLocationscopy):
 		print('updating')
 		self.board[location2] = self.board[location1]
 		self.board[location1] = None
@@ -432,7 +433,7 @@ class ChessBoard():
 			if i != None:
 				if self.__checkCheck(i) == colour:
 					print('passsingggggg\n\n\n\n')
-					self.__revert(location1, location2, boardcopy, slideLocationscopy)
+					self.__revert(location1, location2, slideLocationscopy)
 					print('reached here and in check')
 					return False
 
@@ -512,6 +513,9 @@ class ChessBoard():
 
 	def __update_castle(self, Klocation, Rlocation1, Rlocation2):
 		print('updating for castling')
+
+
+
 		self.board[Klocation] = self.board[self.Wking_location]
 		self.board[self.Wking_location] = None
 		self.board[Klocation].location = Klocation
@@ -556,6 +560,8 @@ class ChessBoard():
 			location = 4
 			self.Bking_location = 4
 
+		print('here')
+
 		self.board[location] = self.board[Klocation]
 		self.board[Klocation] = None
 		self.board[location].location = location
@@ -563,12 +569,13 @@ class ChessBoard():
 		self.Rlocation2 = None
 		self.board[location].update_ADSquares()
 		self.board[Rlocation1].update_ADSquares()
+		for i in self.slideLocations:
+			self.board[i].block_update(location2, location1)
 
 
 	def move(self, location1, location2, colour):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
-		boardcopy = self.board
 		slideLocationscopy = self.slideLocations
 
 		if piece1 != None:
@@ -577,38 +584,33 @@ class ChessBoard():
 					if self.__selfTake(location1, location2) == True:
 						if type(piece1) is not Pawn:
 							if type(piece1) == King:
-								print('I\'m the kingggggg')
 								print(location2 in piece1.ADSquares)
 								if location2 in piece1.ADSquares:
-									print('bbbbbbbbbbbbbbbbbbbbbbb')
-									return self.__update_Board(location1, location2, colour, piece1, piece2, boardcopy, slideLocationscopy)
+									return self.__update_Board(location1, location2, colour, piece1, piece2, slideLocationscopy)
 
 								elif self.castle(piece1, location2) == True:
-									print('aaaaaaaaaaaaaaaaaaaaaaa')
-									return self.__update_Board(location1, location2, colour, piece1, piece2, boardcopy, slideLocationscopy)
-
-								print('reached enddddddddddddddddddddddddddddddddd')
+									return self.__update_Board(location1, location2, colour, piece1, piece2, slideLocationscopy)
 
 							elif location2 in piece1.ADSquares:
-								return self.__update_Board(location1, location2, colour, piece1, piece2, boardcopy, slideLocationscopy)
+								return self.__update_Board(location1, location2, colour, piece1, piece2, slideLocationscopy)
 
 						else:
 							if self.board[location2] == None:
 								if piece1.movePawn(location2) == True:
-									return self.__update_Board( location1, location2, colour, piece1, piece2, boardcopy, slideLocationscopy)
+									return self.__update_Board( location1, location2, colour, piece1, piece2, slideLocationscopy)
 
 								elif piece1.enPassant(location2) != 0:
 									print('enPassant')
 									take = piece1.enPassant(location2)
 									self.board[take] = None
-									return self.__update_Board(location1, location2, colour, piece1, piece2, boardcopy, slideLocationscopy)
+									return self.__update_Board(location1, location2, colour, piece1, piece2, slideLocationscopy)
 
 							else:
 								print('attacking')
 								print(piece1.ADSquares)
 								print(location2)
 								if location2 in piece1.ADSquares:
-									return self.__update_Board(location1, location2, colour, piece1, piece2, boardcopy, slideLocationscopy)
+									return self.__update_Board(location1, location2, colour, piece1, piece2, slideLocationscopy)
 
 
 		print('Failed')
