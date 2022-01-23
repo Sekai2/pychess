@@ -22,7 +22,6 @@ class Piece():
 			 		self.ADSquares.remove(i)
 
 	def update_slide(self, location, direction, squares):
-		print(squares)
 
 		#updates ADSqures for a single line/direction
 		location = location + direction
@@ -417,11 +416,6 @@ class ChessBoard():
 
 
 		for i in self.slideLocations:
-			print('\n\n')
-			print(self.board[i])
-			print(self.board[i].colour)
-			print(file_letter(i) + rank_num(i))
-			print(self.board[i].ADSquares)
 			self.board[i].block_update(location1, location2)
 			squares = []
 			for i in self.board[i].ADSquares:
@@ -485,14 +479,12 @@ class ChessBoard():
 						return True
 
 			elif location2 == 0x76:
-				print('yeeeeee')
 				if piece.Kcastling == True:
-					print('wooooooooooo')
 					print(piece.location)
 					print(self.board[119].ADSquares)
 					if piece.location in self.board[119].ADSquares:
 						print('castling')
-						__update_castle(0x76, 0x77, 0x75)
+						self.__update_castle(0x76, 0x77, 0x75)
 						return True
 
 		elif piece.colour == 'black':
@@ -523,16 +515,34 @@ class ChessBoard():
 		self.board[Klocation].update_ADSquares()
 		self.board[Rlocation2].update_ADSquares()
 
-		self.Wking_location = Klocation
+		Klocation1 = self.Wking_location
+
+		if self.board[Klocation].colour == 'white':
+			self.Wking_location = Klocation
+
+		else:
+			self.Bking_location = Klocation
+
+		print('yoooooooo')
+		print(self.board[Rlocation2])
+		print(Rlocation1)
+		self.update_locations(self.board[Rlocation2], Rlocation1)
 
 		for i in self.slideLocations:
 			print(self.board[i])
-			self.board[i].block_update(location1, location2)
+			self.board[i].block_update(Rlocation1, Rlocation2)
+			print('reached point one')
+			self.board[i].block_update(Klocation1, Klocation)
+			print('reached point two')
+
+		print('here')
 
 		for i in self.board:
 			if i != None:
 				if self.__checkCheck(i) == self.board[Klocation].colour:
 					self.__revert_castle(Klocation, Rlocation1, Rlocation2)
+
+		print('reached end')
 
 	def __revert_castle(self, Klocation, Rlocation1, Rlocation2):
 		print('reverting castling')

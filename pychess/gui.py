@@ -135,13 +135,16 @@ class gui():
 	def __move(self, coordinate1, coordinate2):
 		index1 = id_square(coordinate1)
 		index2 = id_square(coordinate2)
+		print('index 1: '+ index1)
+		print('index 2: '+ index2)
 		if len(index1) < 4:
 			index1 = index1[:2] + '0' + index1[2]
 
 		if len(index2) < 4:
-			index2 = index2[:2] + '0' + index1[2]
+			index2 = index2[:2] + '0' + index2[2]
 			
 		indexs = index1 + index2
+		print('indexes are: ' + indexs)
 		f = open('move.txt','w')
 		f.write(indexs)
 		f.close()
