@@ -209,7 +209,8 @@ class King(Piece):
 		self.ADSquares = []
 		directions = [-17, -16, -15, -1, 1, 15, 16, 17]
 		for i in directions:
-			self.ADSquares.append(self.location + i)
+			if board1.offBoardCheck(self.location + i) == True:
+				self.ADSquares.append(self.location + i)
 
 class FEN():
 	def __init__(self):
@@ -389,12 +390,14 @@ class ChessBoard():
 				return 'white'
 		return False
 
-	def __revert(self, location1, location2, boardcopy):
+	def __revert(self, location1, location2, boardcopy, slideLocationscopy):
+		print('reverting')
 		self.board = boardcopy
 		self.board[location1].location = location1
 		self.board[location1].uopdate_ADSquares()
 		self.slideLocations = slideLocationscopy
 		self.board[i].block_update(location2, location1)
+		print('I am here haha')
 
 	def __update_Board(self, location1, location2, colour, piece1, piece2, boardcopy, slideLocationscopy):
 		print('updating')
@@ -428,7 +431,9 @@ class ChessBoard():
 		for i in self.board:
 			if i != None:
 				if self.__checkCheck(i) == colour:
+					print('passsingggggg\n\n\n\n')
 					self.__revert(location1, location2, boardcopy, slideLocationscopy)
+					print('reached here and in check')
 					return False
 
 		#updating castling ability
@@ -512,6 +517,7 @@ class ChessBoard():
 		self.board[Klocation].location = Klocation
 		self.board[Rlocation2] = self.board[Rlocation1]
 		self.board[Rlocation1] = None
+		self.board[Rlocation2].location = Rlocation2
 		self.board[Klocation].update_ADSquares()
 		self.board[Rlocation2].update_ADSquares()
 
@@ -523,26 +529,22 @@ class ChessBoard():
 		else:
 			self.Bking_location = Klocation
 
-		print('yoooooooo')
-		print(self.board[Rlocation2])
-		print(Rlocation1)
 		self.update_locations(self.board[Rlocation2], Rlocation1)
 
 		for i in self.slideLocations:
 			print(self.board[i])
 			self.board[i].block_update(Rlocation1, Rlocation2)
-			print('reached point one')
 			self.board[i].block_update(Klocation1, Klocation)
-			print('reached point two')
-
-		print('here')
 
 		for i in self.board:
 			if i != None:
 				if self.__checkCheck(i) == self.board[Klocation].colour:
 					self.__revert_castle(Klocation, Rlocation1, Rlocation2)
-
-		print('reached end')
+		self.print_board()
+		print(self.board[Klocation].ADSquares)
+		print(self.board[Rlocation2].ADSquares)
+		print(self.Wking_location)
+		self.__write_board()
 
 	def __revert_castle(self, Klocation, Rlocation1, Rlocation2):
 		print('reverting castling')
