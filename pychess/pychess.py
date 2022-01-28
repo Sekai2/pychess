@@ -14,7 +14,7 @@ class Piece():
 
 	#diagonal sliding for queens and bishops
 
-	def __clean(self):
+	def clean(self):
 		#deletes repeats from ADSquares
 		for i in self.ADSquares:
 			 if self.ADSquares.count(i) > 1:
@@ -58,7 +58,7 @@ class Piece():
 			self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
 			print(self.ADSquares)
 
-		self.__clean()
+		self.clean()
 
 	def block_update(self, location1, location2):
 		#updates ADSquares for sliding pieces when blocking pieces are moved or pieces are moved into slide line
@@ -67,6 +67,8 @@ class Piece():
 
 		else:
 			self.id_direction(location1)
+
+		self.clean()
 
 #Note: ADSqaures(variable) stores all the squares which a piece attacks
 #      update_ADSquares(method) updates the ADSqaures for a piece
