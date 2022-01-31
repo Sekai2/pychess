@@ -778,7 +778,7 @@ class computer(player):
 	def __init__(self, colour):
 		player.__init__(self)
 		self.colour = colour
-		self.depth = 1
+		self.max_depth = 1
 
 	def turn(self):
 		pass
@@ -810,10 +810,10 @@ class computer(player):
 		else:
 			return min(minimax(depth + 1, node * 2, True, values, max_depth),minimax(depth + 1, node * 2 + 1, True, values, max_depth))
 
-#	def generate(self):
-#		for i in board1.board:
-#			if i != None:
-#				if type(i) != Pawn:
+	def generate(self, depth):
+		for i in board1.board:
+			if i != None:
+				if type(i) == Pawn:
 
 
 class clock():
