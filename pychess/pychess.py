@@ -426,10 +426,11 @@ class ChessBoard():
 
 		return False
 
-	def __revert(self, location1, location2):
+	def __revert(self, location1, location2, piece2):
 		self.board[location1] = self.board[location2]
 		self.board[location1].location = location1
-		self.board[location2] = None
+		self.board[location2] = piece2
+		self.board[location2].location = location2
 		self.board[location1].update_ADSquares()
 		self.update_locations(self.board[location1], location2)
 		for i in self.slideLocations:
@@ -453,15 +454,12 @@ class ChessBoard():
 			for i in self.board[i].ADSquares:
 				squares.append(file_letter(i) + rank_num(i))
 
-
-		self.print_board()
-
 		for i in self.board:
 			if i != None:
 				if self.__checkCheck(i) == colour:
 					if self.__checkmateCheck(colour) == True:
 						return('checkmate')
-					self.__revert(location1, location2)
+					self.__revert(location1, location2, piece2)
 					return False
 
 		#updating castling ability
@@ -496,7 +494,6 @@ class ChessBoard():
 					elif location2 == 7:
 						self.board[self.Bking_location].Kcastling = False
 
-		self.print_board()
 		self.__write_board()
 		#self.__attack_check(piece1,piece2)
 		return True
@@ -506,41 +503,45 @@ class ChessBoard():
 			if location2 == 0x72:
 				if piece.Qcastling == True:
 					if piece.location in self.board[112].ADSquares:
-						if self.__update_castle(0x72, 0x70, 0x73) == True:
+						if self.__update_castle(0x72, 0x70, 0x73, 'white') == True:
 							return True
 
 			elif location2 == 0x76:
 				if piece.Kcastling == True:
 					if piece.location in self.board[119].ADSquares:
-						if self.__update_castle(0x76, 0x77, 0x75) == True:
+						if self.__update_castle(0x76, 0x77, 0x75, 'white') == True:
 							return True
 
 		elif piece.colour == 'black':
 			if location2 == 0x02:
 				if piece.Qcastling == True:
 					if piece.location in self.board[0].ADSquares:
-						if self.__update_castle(0x02, 0x00, 0x03) == True:
+						if self.__update_castle(0x02, 0x00, 0x03, 'black') == True:
 							return True
 
 			elif location2 == 0x06:
 				if piece.Kcastling == True:
 					if piece.location in self.board[7].ADSquares:
-						if self.__update_castle(0x06, 0x07, 0x05) == True:
+						if self.__update_castle(0x06, 0x07, 0x05, 'black') == True:
 							return True
 		return False
 
-	def __update_castle(self, Klocation, Rlocation1, Rlocation2):
+	def __update_castle(self, Klocation, Rlocation1, Rlocation2, colour):
+		if colour == 'white':
+			Klocation1 = self.Wking_location
 
-		self.board[Klocation] = self.board[self.Wking_location]
-		self.board[self.Wking_location] = None
+		else:
+			Klocation1 = self.Bking_location
+
+		self.board[Klocation] = self.board[Klocation1]
+		self.board[Klocation1] = None
 		self.board[Klocation].location = Klocation
 		self.board[Rlocation2] = self.board[Rlocation1]
 		self.board[Rlocation1] = None
 		self.board[Rlocation2].location = Rlocation2
 		self.board[Klocation].update_ADSquares()
 		self.board[Rlocation2].update_ADSquares()
-
-		Klocation1 = self.Wking_location
+		self.Wking_location = Klocation
 
 		self.update_locations(self.board[Rlocation2], Rlocation1)
 
@@ -552,10 +553,11 @@ class ChessBoard():
 			if i != None:
 				if self.__checkCheck(i) == self.board[Klocation].colour:
 					if self.__checkmateCheck(colour):
-						endGame(colour)
+						return 'checkmate'
 					self.__revert_castle(Klocation, Rlocation1, Rlocation2)
-		self.print_board()
+					return False
 		self.__write_board()
+		return True
 
 	def __revert_castle(self, Klocation, Rlocation1, Rlocation2):
 		if self.board[Klocation].colour == 'white':
@@ -571,6 +573,7 @@ class ChessBoard():
 		self.board[location].location = location
 		self.board[Rlocation1] = self.board[Rlocation2]
 		self.board[Rlocation2] = None
+		self.board[Rlocation1].location = Rlocation1
 		self.board[location].update_ADSquares()
 		self.board[Rlocation1].update_ADSquares()
 		self.update_locations(self.board[Rlocation1], Rlocation2)
@@ -591,8 +594,8 @@ class ChessBoard():
 								if location2 in piece1.ADSquares:
 									return self.__update_Board(location1, location2, colour, piece1, piece2)
 
-								elif self.castle(piece1, location2) == True:
-									return True
+								else:
+									return self.castle(piece1, location2)
 
 							elif location2 in piece1.ADSquares:
 								return self.__update_Board(location1, location2, colour, piece1, piece2)
@@ -610,8 +613,6 @@ class ChessBoard():
 							else:
 								if location2 in piece1.ADSquares:
 									return self.__update_Board(location1, location2, colour, piece1, piece2)
-
-		self.print_board()
 		return False
 
 	def __selfTake(self, location1, location2):
@@ -759,6 +760,7 @@ class computer(player):
 	def __init__(self, colour):
 		player.__init__(self)
 		self.colour = colour
+		self.depth = 1
 
 	def turn(self):
 		pass
@@ -789,6 +791,12 @@ class computer(player):
 
 		else:
 			return min(minimax(depth + 1, node * 2, True, values, max_depth),minimax(depth + 1, node * 2 + 1, True, values, max_depth))
+
+	def generate(self):
+		for i in board1.board:
+			if i != None:
+				if type(i) != Pawn:
+
 
 class clock():
 	def __init__(self, timer):
