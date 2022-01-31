@@ -427,10 +427,12 @@ class ChessBoard():
 		return False
 
 	def __revert(self, location1, location2, piece2):
+		print('reverting')
 		self.board[location1] = self.board[location2]
 		self.board[location1].location = location1
 		self.board[location2] = piece2
-		self.board[location2].location = location2
+		if self.board[location2] != None:
+			self.board[location2].location = location2
 		self.board[location1].update_ADSquares()
 		self.update_locations(self.board[location1], location2)
 		for i in self.slideLocations:
@@ -454,12 +456,27 @@ class ChessBoard():
 			for i in self.board[i].ADSquares:
 				squares.append(file_letter(i) + rank_num(i))
 
+		if colour == 'white':
+			if self.Bking_location in self.board[location2].ADSquares:
+				if self.__checkmateCheck(colour) == True:
+					print('checkmate')
+					return('checkmate')
+
+		elif colour == 'black':
+			if self.Wking_location in self.board[location2].ADSquares:
+				if self.__checkmateCheck(colour) == True:
+					print('checkmate')
+					return('checkmate')
+
 		for i in self.board:
 			if i != None:
 				if self.__checkCheck(i) == colour:
+					print(' in check')
 					if self.__checkmateCheck(colour) == True:
+						print('checkmate')
 						return('checkmate')
 					self.__revert(location1, location2, piece2)
+					print('returning false')
 					return False
 
 		#updating castling ability
@@ -529,9 +546,11 @@ class ChessBoard():
 	def __update_castle(self, Klocation, Rlocation1, Rlocation2, colour):
 		if colour == 'white':
 			Klocation1 = self.Wking_location
+			self.Wking_location = Klocation
 
 		else:
 			Klocation1 = self.Bking_location
+			self.Bking_location = Klocation
 
 		self.board[Klocation] = self.board[Klocation1]
 		self.board[Klocation1] = None
@@ -541,7 +560,6 @@ class ChessBoard():
 		self.board[Rlocation2].location = Rlocation2
 		self.board[Klocation].update_ADSquares()
 		self.board[Rlocation2].update_ADSquares()
-		self.Wking_location = Klocation
 
 		self.update_locations(self.board[Rlocation2], Rlocation1)
 
@@ -792,10 +810,10 @@ class computer(player):
 		else:
 			return min(minimax(depth + 1, node * 2, True, values, max_depth),minimax(depth + 1, node * 2 + 1, True, values, max_depth))
 
-	def generate(self):
-		for i in board1.board:
-			if i != None:
-				if type(i) != Pawn:
+#	def generate(self):
+#		for i in board1.board:
+#			if i != None:
+#				if type(i) != Pawn:
 
 
 class clock():

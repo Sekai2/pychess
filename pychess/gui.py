@@ -8,10 +8,6 @@ def id_square(coordinate):
 	x_index = x // 79
 	y_index = y // 79
 	index = x_index + y_index*16
-	print(coordinate)
-	print('x ' + str(x_index))
-	print('y ' + str(y_index))
-	print('board index = ' + str(index))
 	return hex(index)
 
 class gui():
@@ -90,13 +86,16 @@ class gui():
 				elif self.press_count == 2:
 					if pygame.mouse.get_pressed() == (True, False, False):
 						self.__getmouse()
-						self.press_count = 0
-						time.sleep(1)
+						self.press_count = 3
+						#time.sleep(1)
 
 				elif self.press_count == 1:
 					if event.type == pygame.MOUSEBUTTONUP:
-						print('2')
 						self.press_count = 2
+
+				elif self.press_count == 3:
+					if event.type == pygame.MOUSEBUTTONUP:
+						self.press_count = 0
 
 			pygame.display.update()
 			clock.tick(60)
@@ -119,24 +118,16 @@ class gui():
 	def __getmouse(self):
 		if pygame.mouse.get_pos()[0] < 632 and pygame.mouse.get_pos()[1] < 633:
 			if self.coordinate1 == None:
-				print('pressed1')
 				self.coordinate1 = pygame.mouse.get_pos()
-				print('first coordinate:')
-				print(self.coordinate1)
 				self.press_count = 1
 
 			else:
-				print('pressed2')
 				self.coordinate2 = pygame.mouse.get_pos()
-				print('second coordinate:')
-				print(self.coordinate2)
 				self.__move(self.coordinate1, self.coordinate2)
 
 	def __move(self, coordinate1, coordinate2):
 		index1 = id_square(coordinate1)
 		index2 = id_square(coordinate2)
-		print('index 1: '+ index1)
-		print('index 2: '+ index2)
 		if len(index1) < 4:
 			index1 = index1[:2] + '0' + index1[2]
 
@@ -144,7 +135,6 @@ class gui():
 			index2 = index2[:2] + '0' + index2[2]
 			
 		indexs = index1 + index2
-		print('indexes are: ' + indexs)
 		f = open('move.txt','w')
 		f.write(indexs)
 		f.close()
