@@ -1,6 +1,7 @@
 import time
 import os
 import math
+import random
 
 from misc import *
 from score import *
@@ -11,6 +12,7 @@ class Piece():
 		self.colour = colour
 		self.location = location
 		self.ADSquares = []
+		self.hashval = 0
 
 	#diagonal sliding for queens and bishops
 
@@ -166,7 +168,7 @@ class Bishop(Piece):
 			self.ADSquares = self.update_slide(self.location, i, self.ADSquares)
 
 class Rook(Piece):
-	def __init__(self, colour, location ):
+	def __init__(self, colour, location):
 		Piece.__init__(self, colour, location)
 		self.value = 5
 		self.character = 'R'
@@ -353,14 +355,19 @@ class FEN():
 
 #Board Class
 class ChessBoard():
-	def __init__(self):
+	def __init__(self, board):
 		FEN_code = FEN()
 		self.board = []
 
 		self.Wking_location = 116
 		self.Bking_location = 4
 
-		self.board = FEN_code.load('standard')
+
+		if board == 'standard':
+			self.board = FEN_code.load('standard')
+
+		else:
+			self.board = board
 
 		self.slideLocations = []
 		for i in self.board:
@@ -773,6 +780,17 @@ class human(player):
 			f.write('listening')
 			f.close()
 
+#node class for min max tree
+class node():
+	def __init__(self, val):
+		self.val = val
+		self.children = []
+		self.hash = None
+		self.visited = False
+
+	def append(self, child):
+		self.children.append(child)
+
 #chess ai class
 class computer(player):
 	def __init__(self, colour):
@@ -800,21 +818,42 @@ class computer(player):
 	def mobilityEval(self):
 		pass
 
-	def minimax(depth, node, maxing, values, max_depth):
-		if depth == max_depth:
-			return values[node]
+#	def minimax(depth, node, maxing, values, max_depth):
+#		if depth == max_depth:
+#			return values[node]
+#
+#		if maxing:
+#			return max(minimax(depth + 1, node * 2, False, values, max_depth),minimax(depth + 1, node * 2 + 1, False, values, max_depth))
+#
+#		else:
+#			return min(minimax(depth + 1, node * 2, True, values, max_depth),minimax(depth + 1, node * 2 + 1, True, values, max_depth))
 
-		if maxing:
-			return max(minimax(depth + 1, node * 2, False, values, max_depth),minimax(depth + 1, node * 2 + 1, False, values, max_depth))
+	def minimax(self, depth, node, location, max_depth, checkmate):
+		if depth == max_depth or checkmate:
+			node.append(self.evaluate(node.val))
 
-		else:
-			return min(minimax(depth + 1, node * 2, True, values, max_depth),minimax(depth + 1, node * 2 + 1, True, values, max_depth))
+		elif location == 127:
+			self.minimax(depth + 1, node.children[0], location, max_depth, checkmate)
 
-	def generate(self, depth):
-		for i in board1.board:
-			if i != None:
-				if type(i) == Pawn:
+		elif type(board1.board[location]) == Pawn:
+			tempBoard = board(node.val)
+			tempBoard.move(location, location + 16, self.colour)
+			node.append(node(tempBoard.board))
+			tempBoard.move(location, location + 32, self.colour)
+			node.append(node(tempBoard.board))
+			node.visited = True
+			self.minimax(depth, node, location + 1, max_depth, checkmate)
 
+		elif type(board1.board[location]) == King:
+			pass
+
+		elif board1.board[location] != None:
+			for i in board1.board[location].ADSquares:
+				tempBoard = board(node.val)
+				tempBoard.move(location, location + 16, self.colour)
+				node.append(node(tempBoard.board))
+				node.visited = True
+				self.minimax(depth, node, location + 1, max_depth, checkmate)
 
 class clock():
 	def __init__(self, timer):
@@ -849,7 +888,7 @@ def endGame(colour):
 
 def game():
 	global board1
-	board1 = ChessBoard()
+	board1 = ChessBoard('standard')
 	board1.ADBoard_init()
 	board1.print_board()
 	valid = False
