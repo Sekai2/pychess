@@ -791,15 +791,66 @@ class node():
 	def append(self, child):
 		self.children.append(child)
 
+	def generate(self, colour):
+		for i in self.val:
+			if i != None:
+				if i.colour == colour:
+					if type(i) == Pawn:
+						tempBoard = self.val
+						if tempBoard.move(i.location, i.location + 16, colour) == True:
+							self.append(tempBoard.board)
+
+						tempBoard = self.val
+						if tempBoard.move(i.location, i.location + 32, colour) == True:
+							self.append(tempBoard.board)
+
+					elif type(i) == King:
+						for j in i.ADSquares:
+							tempBoard = self.val
+							if tempBoard.move(i.location, j, colour) == True:
+								self.append(tempBoard.board)
+
+						if i.colour == 'white':
+							if i.location == 116:
+								if i.Qcastling == True:
+									tempBoard = self.val
+									if tempBoard.move(116, 114, colour) == True:
+										self.append(tempBoard.board)
+
+								if i.Kcastling == True:
+									tempBoard = self.val
+									if tempBoard.move(116, 118, colour) == True:
+										self.append(tempBoard.board)
+
+						if i.colour == 'black':
+							if i.location == 4:
+								if i.Qcastling == True:
+									tempBoard = self.val
+									if tempBoard.move(4, 2, colour) == True:
+										self.append(tempBoard.board)
+
+								if i.Kcastling == True:
+									tempBoard = self.val
+									if tempBoard.move(4, 2, colour) == True:
+										self.append(tempBoard.board)
+
+
+					else:
+						for j in i.ADSquares:
+							tempboard = self.val
+							if tempBoard.move(i.location, j, colour) == True:
+								self.append(tempBoard.board)
+
 #chess ai class
 class computer(player):
 	def __init__(self, colour):
 		player.__init__(self)
 		self.colour = colour
-		self.max_depth = 1
+		self.max_depth = 2
 
 	def turn(self):
-		pass
+		rootNode = node(board1.board)
+		minimax(self, 1, rootNode, 0, self.max_depth, False, self.colour)
 
 	def evaluate(self):
 		if self.colour == 'white':
@@ -828,12 +879,31 @@ class computer(player):
 #		else:
 #			return min(minimax(depth + 1, node * 2, True, values, max_depth),minimax(depth + 1, node * 2 + 1, True, values, max_depth))
 
-	def minimax(self, depth, node, location, max_depth, checkmate):
-		if depth == max_depth or checkmate:
+	def generate(self, depth, node, max_depth, childIndex, colour):
+		if depth != max_depth:
+			for i in node.board:
+				if i != None:
+					if i.colour == colour:
+						for j in range(i.ADSquares):
+							tempBoard = board1
+							if tempBoard.move(i.location, j, colour) == True:
+								node.append(tempBoard.board)
+
+
+
+		return
+					
+
+
+	def generate(self, depth, node, location, max_depth, checkmate, colour, child):
+		if depth == max_depth:
+			node.append(self.evaluate(node.val))
+
+		elif checkmate == True:
 			node.append(self.evaluate(node.val))
 
 		elif location == 127:
-			self.minimax(depth + 1, node.children[0], location, max_depth, checkmate)
+			self.generate(depth + 1, node.children[0], location, max_depth, checkmate)
 
 		elif type(board1.board[location]) == Pawn:
 			tempBoard = board(node.val)
@@ -842,7 +912,7 @@ class computer(player):
 			tempBoard.move(location, location + 32, self.colour)
 			node.append(node(tempBoard.board))
 			node.visited = True
-			self.minimax(depth, node, location + 1, max_depth, checkmate)
+			self.generate(depth, node, location + 1, max_depth, checkmate)
 
 		elif type(board1.board[location]) == King:
 			pass
@@ -850,10 +920,10 @@ class computer(player):
 		elif board1.board[location] != None:
 			for i in board1.board[location].ADSquares:
 				tempBoard = board(node.val)
-				tempBoard.move(location, location + 16, self.colour)
-				node.append(node(tempBoard.board))
-				node.visited = True
-				self.minimax(depth, node, location + 1, max_depth, checkmate)
+				if tempBoard.move(location, i, self.colour) == True:
+					node.append(node(tempBoard.board))
+			node.visited = True
+			self.generate(depth, node, location + 1, max_depth, checkmate)
 
 class clock():
 	def __init__(self, timer):
@@ -897,6 +967,7 @@ def game():
 	while valid == False:
 		menu = input('Input 1 to play against a player\nInput 2 to play against computer\n\n')
 		if menu == '1':
+			valid = True
 			print('playing against human')
 			player1 = human('white')
 			player2 = human('black')
@@ -916,6 +987,42 @@ def game():
 		elif menu == '2':
 			valid = True
 			print('playing against computer')
+			loop = True
+			colour = input('Select your side w/b:\n')
+			while loop == True:
+				try:
+					if colour.lower == 'w':
+						loop = False
+						print('Playing as white')
+						colour1 = 'white'
+						colour2 = 'black'
+
+					elif colour.lower == 'b':
+						loop = False
+						print('Playing as black')
+						colour1 = 'black'
+						colour2 = 'white'
+
+					else:
+						print('That is not an option')
+
+				except:
+					print('That is not an option')
+
+				player1 = human(colour1)
+				player2 = computer(colour2)
+				end = False
+				endColour = 'white'
+				while end != True:
+					end = player1.turn()
+					if end != True:
+						end = player2.turn()
+
+					else:
+						endColour = 'black'
+
+				endGame(endColour)
+
 
 		else:
 			print('that is not an option')
