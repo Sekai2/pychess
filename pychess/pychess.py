@@ -850,6 +850,7 @@ class computer(player):
 
 	def turn(self):
 		rootNode = node(board1.board)
+		grow(rootNode, 0, max_depth,self.colour)
 		minimax(self, 1, rootNode, 0, self.max_depth, False, self.colour)
 
 	def evaluate(self):
@@ -879,51 +880,20 @@ class computer(player):
 #		else:
 #			return min(minimax(depth + 1, node * 2, True, values, max_depth),minimax(depth + 1, node * 2 + 1, True, values, max_depth))
 
-	def generate(self, depth, node, max_depth, childIndex, colour):
-		if depth != max_depth:
-			for i in node.board:
-				if i != None:
-					if i.colour == colour:
-						for j in range(i.ADSquares):
-							tempBoard = board1
-							if tempBoard.move(i.location, j, colour) == True:
-								node.append(tempBoard.board)
+	def grow(self, node, depth, max_depth, colour):
+		if node == max_depth:
+			return
 
+		else:
+			node.generate(colour)
+			if colour == 'white':
+				colour = 'black'
 
+			else:
+				colour = 'white'
+			for i in currentNode.children:
+				grow(i, depth + 1, max_depth, colour)
 
-		return
-					
-
-
-	def generate(self, depth, node, location, max_depth, checkmate, colour, child):
-		if depth == max_depth:
-			node.append(self.evaluate(node.val))
-
-		elif checkmate == True:
-			node.append(self.evaluate(node.val))
-
-		elif location == 127:
-			self.generate(depth + 1, node.children[0], location, max_depth, checkmate)
-
-		elif type(board1.board[location]) == Pawn:
-			tempBoard = board(node.val)
-			tempBoard.move(location, location + 16, self.colour)
-			node.append(node(tempBoard.board))
-			tempBoard.move(location, location + 32, self.colour)
-			node.append(node(tempBoard.board))
-			node.visited = True
-			self.generate(depth, node, location + 1, max_depth, checkmate)
-
-		elif type(board1.board[location]) == King:
-			pass
-
-		elif board1.board[location] != None:
-			for i in board1.board[location].ADSquares:
-				tempBoard = board(node.val)
-				if tempBoard.move(location, i, self.colour) == True:
-					node.append(node(tempBoard.board))
-			node.visited = True
-			self.generate(depth, node, location + 1, max_depth, checkmate)
 
 class clock():
 	def __init__(self, timer):
@@ -991,6 +961,7 @@ def game():
 			colour = input('Select your side w/b:\n')
 			while loop == True:
 				try:
+					print('testing')
 					if colour.lower == 'w':
 						loop = False
 						print('Playing as white')
@@ -1004,9 +975,11 @@ def game():
 						colour2 = 'white'
 
 					else:
+						print('a')
 						print('That is not an option')
 
 				except:
+					print('b')
 					print('That is not an option')
 
 				player1 = human(colour1)
