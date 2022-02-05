@@ -57,20 +57,24 @@ class Piece():
 				direction = 15
 				direction = direction * multiplier
 
-			self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
-			print(self.ADSquares)
-
-		self.clean()
+			return direction
 
 	def block_update(self, location1, location2):
+		print('block updating')
 		#updates ADSquares for sliding pieces when blocking pieces are moved or pieces are moved into slide line
 		if location2 in self.ADSquares:
 			self.update_ADSquares()
 
 		else:
-			self.id_direction(location1)
+			print('point 1')
+			direction = self.id_direction(location1)
+			print(direction)
+			self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
+			print(self.ADSquares)
+			print('point 2')
 
 		self.clean()
+		print('reached end')
 
 #Note: ADSqaures(variable) stores all the squares which a piece attacks
 #      update_ADSquares(method) updates the ADSqaures for a piece
@@ -404,7 +408,7 @@ class ChessBoard():
 				return 'white'
 		return False
 
-	def __checkmateCheck(self, colour):
+	def __checkmateCheck(self, colour, piece):
 		print('checking for Checkmate')
 		if colour == 'white':
 			king = self.board[self.Wking_location]
@@ -413,6 +417,11 @@ class ChessBoard():
 			king = self.board[self.Bking_location]
 
 		kingSquares = king.ADSquares
+
+		direction = piece.id_direction(king.location)
+
+		inLineSquares = []
+		inLineSquares = piece.update_slide(piece.location, direction, inLineSquares)
 
 		for i in range(len(self.board)):
 			if self.board[i] != None:
@@ -427,6 +436,11 @@ class ChessBoard():
 				else:
 					if i in kingSquares:
 						kingSquares.remove(i)
+
+					for p in i.ADSquares:
+						if p in inLineSquares:
+							return False
+
 
 		if len(kingSquares) == 0:
 			return True
@@ -479,7 +493,7 @@ class ChessBoard():
 			if i != None:
 				if self.__checkCheck(i) == colour:
 					print(' in check')
-					if self.__checkmateCheck(colour) == True:
+					if self.__checkmateCheck(colour, i) == True:
 						print('checkmate')
 						return('checkmate')
 					self.__revert(location1, location2, piece2)
