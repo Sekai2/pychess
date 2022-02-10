@@ -66,15 +66,12 @@ class Piece():
 			self.update_ADSquares()
 
 		else:
-			print('point 1')
 			direction = self.id_direction(location1)
-			print(direction)
-			self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
-			print(self.ADSquares)
-			print('point 2')
+			if direction != None:
+				self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
 
 		self.clean()
-		print('reached end')
+		print('aaaaaaaa')
 
 #Note: ADSqaures(variable) stores all the squares which a piece attacks
 #      update_ADSquares(method) updates the ADSqaures for a piece
