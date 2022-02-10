@@ -428,6 +428,9 @@ class ChessBoard():
 							kingSquares.remove(j)
 
 						elif len(kingSquares) == 0:
+							for p in i.ADSquares:
+								if p in inLineSquares:
+									return False
 							return True
 
 				else:
