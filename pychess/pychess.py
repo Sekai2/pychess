@@ -60,7 +60,6 @@ class Piece():
 			return direction
 
 	def block_update(self, location1, location2):
-		print('block updating')
 		#updates ADSquares for sliding pieces when blocking pieces are moved or pieces are moved into slide line
 		if location2 in self.ADSquares:
 			self.update_ADSquares()
@@ -71,7 +70,6 @@ class Piece():
 				self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
 
 		self.clean()
-		print('aaaaaaaa')
 
 #Note: ADSqaures(variable) stores all the squares which a piece attacks
 #      update_ADSquares(method) updates the ADSqaures for a piece
@@ -84,7 +82,6 @@ class Pawn(Piece):
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
-		print('updating pawn')
 		if self.colour == 'white':
 			direction = -1
 
@@ -117,7 +114,6 @@ class Pawn(Piece):
 
 	def enPassant(self, destination):
 		#pawn specific method for moving a pawn using the en passant rule
-		print('enPassant check')
 		if self.colour == 'white':
 			rank = 3
 			direction = -1
@@ -146,7 +142,6 @@ class Knight(Piece):
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
-		print('\nupdating Knight')
 		self.ADSquares = []
 		square_dif = [-33 ,-31 ,-18, -14, 14, 18, 31, 33]
 		for i in square_dif:
@@ -162,7 +157,6 @@ class Bishop(Piece):
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
-		print('\nupdating Bishop')
 		self.ADSquares = []
 		directions = [-17, -15, 15, 17]
 		for i in directions:
@@ -178,7 +172,6 @@ class Rook(Piece):
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
-		print('\nupdating Rook')
 		self.ADSquares = []
 		directions = [-16, -1, 1, 16]
 		for i in directions:
@@ -193,7 +186,6 @@ class Queen(Piece):
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
-		print('\nupdating Queen')
 		self.ADSquares = []
 		directions = [-17, -16, -15, -1, 1, 15, 16, 17]
 		for i in directions:
@@ -210,7 +202,6 @@ class King(Piece):
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
-		print('\nupdating King')
 		self.ADSquares = []
 		directions = [-17, -16, -15, -1, 1, 15, 16, 17]
 		for i in directions:
@@ -348,7 +339,6 @@ class FEN():
 					board.append(None)
 
 			else:
-				print(len(board))
 				return(board)
 
 	def notate(self, board):
@@ -398,45 +388,49 @@ class ChessBoard():
 		#initiating check for check
 		if piece.colour == 'white':
 			if self.Bking_location in piece.ADSquares:
+				print('black in check')
 				return 'black'
 
 		else:
 			if self.Wking_location in piece.ADSquares:
+				print('white in check')
 				return 'white'
 		return False
 
 	def __checkmateCheck(self, colour, piece):
 		print('checking for Checkmate')
+		print(piece)
+		print(piece.location)
 		if colour == 'white':
-			king = self.board[self.Wking_location]
+			king = self.board[self.Bking_location]
 
 		else:
-			king = self.board[self.Bking_location]
+			king = self.board[self.Wking_location]
 
 		kingSquares = king.ADSquares
 
 		direction = piece.id_direction(king.location)
 
+		print(direction)
+
 		inLineSquares = []
 		inLineSquares = piece.update_slide(piece.location, direction, inLineSquares)
 
+		print(inLineSquares)
+
 		for i in range(len(self.board)):
 			if self.board[i] != None:
+				print(self.board[i])
 				if self.board[i].colour != king.colour:
 					for j in king.ADSquares:
 						if j in self.board[i].ADSquares:
 							kingSquares.remove(j)
 
-						elif len(kingSquares) == 0:
-							for p in i.ADSquares:
-								if p in inLineSquares:
-									return False
-							return True
-
 				else:
 					if i in kingSquares:
 						kingSquares.remove(i)
 
+					print(self.board[i].ADSquares)
 					for p in i.ADSquares:
 						if p in inLineSquares:
 							return False
@@ -479,23 +473,27 @@ class ChessBoard():
 
 		if colour == 'white':
 			if self.Bking_location in self.board[location2].ADSquares:
-				if self.__checkmateCheck(colour) == True:
+				print('aaaaaaaa')
+				if self.__checkmateCheck(colour, self.board[location2]) == True:
 					print('checkmate')
 					return('checkmate')
+				print('not checkmate')
 
 		elif colour == 'black':
 			if self.Wking_location in self.board[location2].ADSquares:
-				if self.__checkmateCheck(colour) == True:
+				if self.__checkmateCheck(colour, self.board[location2]) == True:
 					print('checkmate')
 					return('checkmate')
 
 		for i in self.board:
 			if i != None:
-				if self.__checkCheck(i) == colour:
+				checkResult = self.__checkCheck(i)
+				if checkResult == colour:
 					print(' in check')
-					if self.__checkmateCheck(colour, i) == True:
-						print('checkmate')
-						return('checkmate')
+					if checkResult != colour:
+						if self.__checkmateCheck(colour, i) == True:
+							print('checkmate')
+							return('checkmate')
 					self.__revert(location1, location2, piece2)
 					print('returning false')
 					return False
