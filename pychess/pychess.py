@@ -2,6 +2,7 @@ import time
 import os
 import math
 import random
+import copy
 
 from misc import *
 from score import *
@@ -88,9 +89,15 @@ class Pawn(Piece):
 		else:
 			direction = 1
 
-		self.ADSquares = [(self.location + (16*direction) - 1),(self.location + (16*direction) + 1)]
+		square1 = self.location + (16*direction) - 1
+		square2 = self.location + (16*direction) + 1
 
-		
+		self.ADSquares = []
+		if board1.offBoardCheck(square1) == True:
+			self.ADSquares.append(square1)
+
+		if board1.offBoardCheck(square2) == True:
+			self.ADSquares.append(square2)
 
 	def movePawn(self, destination):
 		#pawn specific method for normal pawn movement
@@ -403,9 +410,11 @@ class ChessBoard():
 		print(piece.location)
 		if colour == 'white':
 			king = self.board[self.Bking_location]
+			colour = 'black'
 
 		else:
 			king = self.board[self.Wking_location]
+			colour = 'white'
 
 		kingSquares = king.ADSquares
 
@@ -420,29 +429,57 @@ class ChessBoard():
 
 		for i in range(len(self.board)):
 			if self.board[i] != None:
-				print(self.board[i])
 				if self.board[i].colour != king.colour:
 					for j in king.ADSquares:
 						if j in self.board[i].ADSquares:
 							kingSquares.remove(j)
 
 				else:
+					print(self.board[i])
+					print(self.board[i].ADSquares)
 					if i in kingSquares:
 						kingSquares.remove(i)
 
-					print(self.board[i].ADSquares)
-					for p in i.ADSquares:
-						if p in inLineSquares:
-							return False
+					if type(self.board[i]) == Pawn:
+						print('type is pawn')
+						if self.board[i].colour == 'white':
+							print('pawn is white')
+							print(i)
+							for g in range(2):
+								t = i - (16 * (g + 1))
+								if t in inLineSquares:
+									if self.move(self.board[i].location, t, colour, True) == True:
+										print('exit 1.1')
+										return False
 
+						if self.board[i].colour == 'black':
+							print('pawn is black')
+							print(i)
+							for g in range(2):
+								t = (i + (16 * (g + 1)))
+								if t in inLineSquares:
+									if self.move(self.board[i].location, t, colour, True) == True:
+										print('exit 1.2')
+										return False
+
+					for p in self.board[i].ADSquares:
+						if p in inLineSquares:
+							print(p)
+							if self.move(self.board[i].location, p, colour, True) == True:
+								print('exit 1')
+								return False
 
 		if len(kingSquares) == 0:
+			print('exit 2')
 			return True
 
+		print('exit 3')
 		return False
 
+	def final_update(self, colour, piece):
+		pass
+
 	def __revert(self, location1, location2, piece2):
-		print('reverting')
 		self.board[location1] = self.board[location2]
 		self.board[location1].location = location1
 		self.board[location2] = piece2
@@ -453,7 +490,7 @@ class ChessBoard():
 		for i in self.slideLocations:
 			self.board[i].block_update(location2, location1)
 
-	def __update_Board(self, location1, location2, colour, piece1, piece2):
+	def __update_Board(self, location1, location2, colour, piece1, piece2, stop_rvt):
 		self.board[location2] = self.board[location1]
 		self.board[location1] = None
 		self.board[location2].location = location2
@@ -473,11 +510,9 @@ class ChessBoard():
 
 		if colour == 'white':
 			if self.Bking_location in self.board[location2].ADSquares:
-				print('aaaaaaaa')
 				if self.__checkmateCheck(colour, self.board[location2]) == True:
 					print('checkmate')
 					return('checkmate')
-				print('not checkmate')
 
 		elif colour == 'black':
 			if self.Wking_location in self.board[location2].ADSquares:
@@ -494,6 +529,9 @@ class ChessBoard():
 						if self.__checkmateCheck(colour, i) == True:
 							print('checkmate')
 							return('checkmate')
+					if stop_rvt == True:
+						print('returning false')
+						return False
 					self.__revert(location1, location2, piece2)
 					print('returning false')
 					return False
@@ -618,7 +656,7 @@ class ChessBoard():
 			self.board[i].block_update(Rlocation2, Rlocation1)
 			self.board[i].block_update(location, Klocation)
 
-	def move(self, location1, location2, colour):
+	def move(self, location1, location2, colour, revert):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
 
@@ -629,27 +667,48 @@ class ChessBoard():
 						if type(piece1) is not Pawn:
 							if type(piece1) == King:
 								if location2 in piece1.ADSquares:
-									return self.__update_Board(location1, location2, colour, piece1, piece2)
+									result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
+									if revert == True:
+										self.__revert(location1, location2, piece2)
+									return result
 
 								else:
-									return self.castle(piece1, location2)
+									if revert == True:
+										result = self.castle(piece1, location2, True)
+									
+									else:
+										result = self.castle(piece1, location2, False)
+
+									return result
 
 							elif location2 in piece1.ADSquares:
-								return self.__update_Board(location1, location2, colour, piece1, piece2)
+								result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
+								if revert == True:
+										self.__revert(location1, location2, piece2)
+								return result
 
 						else:
 							if self.board[location2] == None:
 								if piece1.movePawn(location2) == True:
-									return self.__update_Board( location1, location2, colour, piece1, piece2)
+									result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
+									if revert == True:
+										self.__revert(location1, location2, piece2)
+									return result
 
 								elif piece1.enPassant(location2) != 0:
 									take = piece1.enPassant(location2)
 									self.board[take] = None
-									return self.__update_Board(location1, location2, colour, piece1, piece2)
+									result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
+									if revert == True:
+										self.__revert(location1, location2, piece2)
+									return result
 
 							else:
 								if location2 in piece1.ADSquares:
-									return self.__update_Board(location1, location2, colour, piece1, piece2)
+									result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
+									if revert == True:
+										self.__revert(location1, location2, piece2)
+									return result
 		return False
 
 	def __selfTake(self, location1, location2):
@@ -728,7 +787,7 @@ class ChessBoard():
 					self.board[location + 8] = colour
 
 				else:
-					count +=1
+					count += 1
 					location = piece.position
 					if count == 1:
 						direction = -1
@@ -773,7 +832,7 @@ class human(player):
 			location2 = int(content[4:], base = 16)
 			print(location1)
 			print(location2)
-			moveResult = board1.move(location1, location2, self.colour)
+			moveResult = board1.move(location1, location2, self.colour, False)
 			if moveResult == False:
 				print('wrong move')
 				self.turn()
@@ -799,59 +858,78 @@ class node():
 		self.children = []
 		self.hash = None
 		self.visited = False
+		self.descendants = 0
 
 	def append(self, child):
 		self.children.append(child)
 
 	def generate(self, colour):
-		for i in self.val:
+		print(self.val.board)
+		for i in self.val.board:
 			if i != None:
 				if i.colour == colour:
 					if type(i) == Pawn:
-						tempBoard = self.val
-						if tempBoard.move(i.location, i.location + 16, colour) == True:
-							self.append(tempBoard.board)
+						if colour == 'black':
+							tempBoard = copy.deepcopy(self.val)
+							if tempBoard.move(i.location, i.location + 16, colour, False) == True:
+								self.append(node(tempBoard))
 
-						tempBoard = self.val
-						if tempBoard.move(i.location, i.location + 32, colour) == True:
-							self.append(tempBoard.board)
+							tempBoard = copy.deepcopy(self.val)
+							if tempBoard.move(i.location, i.location + 32, colour, False) == True:
+								self.append(node(tempBoard))
+
+						if colour == 'white':
+							tempBoard = copy.deepcopy(self.val)
+							if tempBoard.move(i.location, i.location - 16, colour, False) == True:
+								self.append(node(tempBoard))
+
+							tempBoard = copy.deepcopy(self.val)
+							if tempBoard.move(i.location, i.location - 32, colour, False) == True:
+								self.append(node(tempBoard))
 
 					elif type(i) == King:
 						for j in i.ADSquares:
-							tempBoard = self.val
-							if tempBoard.move(i.location, j, colour) == True:
-								self.append(tempBoard.board)
+							tempBoard = copy.deepcopy(self.val)
+							if tempBoard.move(i.location, j, colour, False) == True:
+								self.append(node(tempBoard))
 
 						if i.colour == 'white':
 							if i.location == 116:
 								if i.Qcastling == True:
-									tempBoard = self.val
-									if tempBoard.move(116, 114, colour) == True:
-										self.append(tempBoard.board)
+									tempBoard = copy.deepcopy(self.val)
+									if tempBoard.move(116, 114, colour, False) == True:
+										self.append(node(tempBoard))
 
 								if i.Kcastling == True:
-									tempBoard = self.val
-									if tempBoard.move(116, 118, colour) == True:
-										self.append(tempBoard.board)
+									tempBoard = copy.deepcopy(self.val)
+									if tempBoard.move(116, 118, colour, False) == True:
+										self.append(node(tempBoard))
 
 						if i.colour == 'black':
 							if i.location == 4:
 								if i.Qcastling == True:
-									tempBoard = self.val
-									if tempBoard.move(4, 2, colour) == True:
-										self.append(tempBoard.board)
+									tempBoard = copy.deepcopy(self.val)
+									if tempBoard.move(4, 2, colour, False) == True:
+										self.append(node(tempBoard))
 
 								if i.Kcastling == True:
-									tempBoard = self.val
-									if tempBoard.move(4, 2, colour) == True:
-										self.append(tempBoard.board)
+									tempBoard = copy.deepcopy(self.val)
+									if tempBoard.move(4, 2, colour, False) == True:
+										self.append(node(tempBoard))
 
 
 					else:
 						for j in i.ADSquares:
-							tempboard = self.val
-							if tempBoard.move(i.location, j, colour) == True:
-								self.append(tempBoard.board)
+							tempBoard = copy.deepcopy(self.val)
+							if tempBoard.move(i.location, j, colour, False) == True:
+								self.append(node(tempBoard))
+
+	def count(self, node):
+		for i in node.children:
+			self.descendants += 1
+			self.count(i)
+
+		return self.descendants
 
 #chess ai class
 class computer(player):
@@ -893,7 +971,7 @@ class computer(player):
 #			return min(minimax(depth + 1, node * 2, True, values, max_depth),minimax(depth + 1, node * 2 + 1, True, values, max_depth))
 
 	def grow(self, node, depth, max_depth, colour):
-		if node == max_depth:
+		if depth == max_depth:
 			return
 
 		else:
@@ -903,9 +981,14 @@ class computer(player):
 
 			else:
 				colour = 'white'
-			for i in currentNode.children:
-				grow(i, depth + 1, max_depth, colour)
+			for i in node.children:
+				self.grow(i, depth + 1, max_depth, colour)
 
+	def test(self):
+		depth = input('Input the number of ply:\n')
+		root = node(board1)
+		self.grow(root, 0, int(depth), 'white')
+		return root.count(root)
 
 class clock():
 	def __init__(self, timer):
@@ -1008,6 +1091,11 @@ def game():
 
 				endGame(endColour)
 
+		elif menu == '3':
+			print('///////////computer test mode///////////')
+			cpu1 = computer('white')
+			print('1st move count: ')
+			print(cpu1.test())
 
 		else:
 			print('that is not an option')
