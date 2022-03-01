@@ -54,6 +54,8 @@ class gui():
 		black_queen = pygame.image.load('assets/bq.png')
 		black_king = pygame.image.load('assets/bk.png')
 
+		self.piece_pick = pygame.image.load('assets/piecepickpng.png')
+
 		self.piece_list = [white_pawn, white_bishop, white_knight, white_rook, white_queen, white_king, black_pawn, black_bishop, black_knight, black_rook, black_queen, black_king]
 
 		self.gameDisplay.blit(gui_board, (0,0))
@@ -72,6 +74,7 @@ class gui():
 			self.gameDisplay.blit(gui_board, (0,0))
 			self.__board_update()
 			self.__updateBar()
+			self.piece_pick_load()
 
 			self.__getmouse == 0
 
@@ -97,6 +100,9 @@ class gui():
 					if event.type == pygame.MOUSEBUTTONUP:
 						self.press_count = 0
 
+			if content == 'choose':
+				pass
+
 			pygame.display.update()
 			clock.tick(60)
 
@@ -114,6 +120,9 @@ class gui():
 
 				elif board[i] == 'o':
 					pass
+
+	def piece_pick_load(self):
+		self.gameDisplay.blit(self.piece_pick, (166,285))
 
 	def __getmouse(self):
 		if pygame.mouse.get_pos()[0] < 632 and pygame.mouse.get_pos()[1] < 633:

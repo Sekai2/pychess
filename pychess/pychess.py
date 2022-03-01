@@ -79,6 +79,7 @@ class Pawn(Piece):
 		Piece.__init__(self, colour, location)
 		self.value = 1
 		self.character = 'P'
+		self.double_move = False
 		if self.colour == 'white':
 			self.character = self.character.lower()
 
@@ -112,10 +113,12 @@ class Pawn(Piece):
 		if board_file(self.location) == board_file(destination):
 			if board_rank(self.location) == 1:
 				if board_rank(destination) - board_rank(self.location) <= 2:
+					self.double_move = True
 					return True
 
 			elif board_rank(self.location) == 6:
 				if board_rank(self.location) - board_rank(destination) <= 2:
+					self.double_move = True
 					return True
 
 			elif abs(board_rank(destination) - board_rank(self.location)) == 1:
@@ -148,9 +151,11 @@ class Pawn(Piece):
 		if board_rank(destination) == board_rank(self.location) + direction:
 			if board1.board[target].colour != self.colour:
 				if type(board1.board[target]) == Pawn:
-					if board_rank(self.location) == rank:
-						if destination == (target + 16 * direction):
-							return i
+					print(board1.board[target].double_move)
+					if board1.board[target].double_move == True:
+						if board_rank(self.location) == rank:
+							if destination == (target + 16 * direction):
+								return i
 		return 0
 
 
@@ -536,6 +541,9 @@ class ChessBoard():
 
 		for i in self.board:
 			if i != None:
+				if type(i) == Pawn:
+					if i.location != location2:
+						i.double_move = False
 				checkResult = self.__checkCheck(i)
 				if checkResult == colour:
 					print(' in check')
@@ -938,10 +946,12 @@ class node():
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard))
 
-	def count(self, node):
+	def count(self, node, ply, target_ply):
+		if ply == target_ply:
+				self.descendants += 1
+
 		for i in node.children:
-			self.descendants += 1
-			self.count(i)
+			self.count(i, ply + 1, target_ply)
 
 		return self.descendants
 
@@ -1006,7 +1016,7 @@ class computer(player):
 		end_time = time.time()
 		total_time = end_time - start_time
 		print('time for generation: ' + str(total_time) + ' seconds')
-		return root.count(root)
+		return root.count(root, 0, int(depth))
 
 class clock():
 	def __init__(self, timer):
