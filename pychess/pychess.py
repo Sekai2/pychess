@@ -105,6 +105,10 @@ class Pawn(Piece):
 			if negcheck(self.location - destination) == True:
 				return False
 
+		elif self.colour == 'black':
+			if negcheck(self.location - destination) == False:
+				return False
+
 		if board_file(self.location) == board_file(destination):
 			if board_rank(self.location) == 1:
 				if board_rank(destination) - board_rank(self.location) <= 2:
@@ -125,18 +129,28 @@ class Pawn(Piece):
 			rank = 3
 			direction = -1
 
-		if self.colour == 'black':
+		elif self.colour == 'black':
 			rank = 4
 			direction = 1
 
-		adjacent = [self.location + 1, self.location -1]
+		target = 0
+
+		adjacent = [self.location + 1, self.location - 1]
 		for i in adjacent:
-			if board1.board[i].colour != self.colour:
-				if type(board1.board[i]) == Pawn:
+			if board_file(i) == board_file(destination):
+				if board_rank(i) == board_rank(self.location):
+					target = i
+
+		if target == None:
+			print('exit 0')
+			return 0
+
+		if board_rank(destination) == board_rank(self.location) + direction:
+			if board1.board[target].colour != self.colour:
+				if type(board1.board[target]) == Pawn:
 					if board_rank(self.location) == rank:
-						if board_file(destination) == board_file(i):
-							if destination == (i + 16 * direction):
-								return i
+						if destination == (target + 16 * direction):
+							return i
 		return 0
 
 
@@ -372,7 +386,7 @@ class ChessBoard():
 			if type(i) == Queen or type(i) == Bishop or type(i) == Rook:
 				self.slideLocations.append(self.board.index(i))
 
-		self.__write_board()
+		self.write_board()
 
 	def ADBoard_init(self):
 		for i in self.board:
@@ -568,7 +582,6 @@ class ChessBoard():
 					elif location2 == 7:
 						self.board[self.Bking_location].Kcastling = False
 
-		self.__write_board()
 		#self.__attack_check(piece1,piece2)
 		return True
 
@@ -631,7 +644,6 @@ class ChessBoard():
 						return 'checkmate'
 					self.__revert_castle(Klocation, Rlocation1, Rlocation2)
 					return False
-		self.__write_board()
 		return True
 
 	def __revert_castle(self, Klocation, Rlocation1, Rlocation2):
@@ -674,10 +686,10 @@ class ChessBoard():
 
 								else:
 									if revert == True:
-										result = self.castle(piece1, location2, True)
+										result = self.castle(piece1, location2)
 									
 									else:
-										result = self.castle(piece1, location2, False)
+										result = self.castle(piece1, location2)
 
 									return result
 
@@ -689,6 +701,7 @@ class ChessBoard():
 
 						else:
 							if self.board[location2] == None:
+								aaa = piece1.movePawn(location2)
 								if piece1.movePawn(location2) == True:
 									result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
 									if revert == True:
@@ -754,7 +767,7 @@ class ChessBoard():
 				x += 1
 			print(out)
 
-	def __write_board(self):
+	def write_board(self):
 		self.__clear_board()
 		f = open('board.txt', 'a')
 		for i in self.board:
@@ -851,6 +864,8 @@ class human(player):
 			f.write('listening')
 			f.close()
 
+		board1.write_board()
+
 #node class for min max tree
 class node():
 	def __init__(self, val):
@@ -864,7 +879,6 @@ class node():
 		self.children.append(child)
 
 	def generate(self, colour):
-		print(self.val.board)
 		for i in self.val.board:
 			if i != None:
 				if i.colour == colour:
@@ -987,7 +1001,11 @@ class computer(player):
 	def test(self):
 		depth = input('Input the number of ply:\n')
 		root = node(board1)
+		start_time = time.time()
 		self.grow(root, 0, int(depth), 'white')
+		end_time = time.time()
+		total_time = end_time - start_time
+		print('time for generation: ' + str(total_time) + ' seconds')
 		return root.count(root)
 
 class clock():
