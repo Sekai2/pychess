@@ -40,19 +40,19 @@ class gui():
 
 
 		#load pieces
-		white_pawn = pygame.image.load('assets/wp.png')
-		white_bishop = pygame.image.load('assets/wb.png')
-		white_knight = pygame.image.load('assets/wn.png')
-		white_rook = pygame.image.load('assets/wr.png')
-		white_queen = pygame.image.load('assets/wq.png')
-		white_king = pygame.image.load('assets/wk.png')
+		white_pawn = pygame.image.load('assets/wp.png')#0
+		white_bishop = pygame.image.load('assets/wb.png')#1
+		white_knight = pygame.image.load('assets/wn.png')#2
+		white_rook = pygame.image.load('assets/wr.png')#3
+		white_queen = pygame.image.load('assets/wq.png')#4
+		white_king = pygame.image.load('assets/wk.png')#5
 
-		black_pawn = pygame.image.load('assets/bp.png')
-		black_bishop = pygame.image.load('assets/bb.png')
-		black_knight = pygame.image.load('assets/bn.png')
-		black_rook = pygame.image.load('assets/br.png')
-		black_queen = pygame.image.load('assets/bq.png')
-		black_king = pygame.image.load('assets/bk.png')
+		black_pawn = pygame.image.load('assets/bp.png')#6
+		black_bishop = pygame.image.load('assets/bb.png')#7
+		black_knight = pygame.image.load('assets/bn.png')#8
+		black_rook = pygame.image.load('assets/br.png')#9
+		black_queen = pygame.image.load('assets/bq.png')#10
+		black_king = pygame.image.load('assets/bk.png')#11
 
 		self.piece_pick = pygame.image.load('assets/piecepickpng.png')
 
@@ -74,34 +74,31 @@ class gui():
 			self.gameDisplay.blit(gui_board, (0,0))
 			self.__board_update()
 			self.__updateBar()
-			self.piece_pick_load()
 
 			self.__getmouse == 0
 
 			f = open('move.txt','r')
 			content = f.read()
 			if content == 'listening':
+				self.__getSelection()
 
-				if self.press_count == 0:
-					if pygame.mouse.get_pressed() == (True, False, False):
-						self.__getmouse()
+			elif content == 'chooseWhite':
+				piece_pick_load('white')
+				result = None
+				while result == None:
+					result = self.__choose_square()
 
-				elif self.press_count == 2:
-					if pygame.mouse.get_pressed() == (True, False, False):
-						self.__getmouse()
-						self.press_count = 3
-						#time.sleep(1)
+			f = open('move.txt','w')
+			f.write(result)
 
-				elif self.press_count == 1:
-					if event.type == pygame.MOUSEBUTTONUP:
-						self.press_count = 2
+			elif ccontent == 'chooseBlack':
+				piece_pick_load('black')
+				result = None
+				while result == None:
+					result = self.__choose_square()
 
-				elif self.press_count == 3:
-					if event.type == pygame.MOUSEBUTTONUP:
-						self.press_count = 0
-
-			if content == 'choose':
-				pass
+			f = open('move.txt','w')
+			f.write(result)
 
 			pygame.display.update()
 			clock.tick(60)
@@ -121,8 +118,38 @@ class gui():
 				elif board[i] == 'o':
 					pass
 
-	def piece_pick_load(self):
-		self.gameDisplay.blit(self.piece_pick, (166,285))
+	def piece_pick_load(self, colour):
+		if colour == 'black':
+			self.gameDisplay.blit(self.piece_pick, (166,125))
+			self.gameDisplay.blit(self.piece_list[8], (178,130))
+			self.gameDisplay.blit(self.piece_list[7], (250,130))
+			self.gameDisplay.blit(self.piece_list[9], (322,130))
+			self.gameDisplay.blit(self.piece_list[10], (394,130))
+
+		elif colour == 'white':
+			self.gameDisplay.blit(self.piece_pick, (166,440))
+			self.gameDisplay.blit(self.piece_list[2], (178,445))
+			self.gameDisplay.blit(self.piece_list[1], (250,445))
+			self.gameDisplay.blit(self.piece_list[3], (322,445))
+			self.gameDisplay.blit(self.piece_list[4], (394,445))
+
+	def __getSelection(self):
+		if self.press_count == 0:
+			if pygame.mouse.get_pressed() == (True, False, False):
+				self.__getmouse()
+
+		elif self.press_count == 2:
+			if pygame.mouse.get_pressed() == (True, False, False):
+				self.__getmouse()
+				self.press_count = 3
+
+		elif self.press_count == 1:
+			if event.type == pygame.MOUSEBUTTONUP:
+				self.press_count = 2
+
+		elif self.press_count == 3:
+			if event.type == pygame.MOUSEBUTTONUP:
+				self.press_count = 0
 
 	def __getmouse(self):
 		if pygame.mouse.get_pos()[0] < 632 and pygame.mouse.get_pos()[1] < 633:
@@ -157,6 +184,35 @@ class gui():
 		font = pygame.font.SysFont('Calibri', 50)
 		img = font.render('90:30', True, self.grey)
 		self.gameDisplay.blit(img, (631,20))
+
+	def __choose_square():
+		if self.press_count == 0:
+			if pygame.mouse.get_pressed() == (True, False, False):
+				self.coordinate = pygame.mouse.get_pos()
+				
+				self.press_count = 1
+
+		elif self.press_count == 1:
+			if event.type == pygame.MOUSEBUTTONUP:
+				self.press_count = 0
+
+		x = coordinate[0]
+		y = coordinate[1]
+		if 125 < y < 195 or 440 < y < 510:
+			if 166< x < 250:
+				return ('N')
+
+			elif 250 < x < 322:
+				return('B')
+
+			elif 322 < x < 394:
+				return('R')
+
+			elif 394 < x < 366:
+				return('Q')
+
+			else:
+				return(None)
 
 	def __quit(self):
 		pygame.quit()
