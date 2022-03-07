@@ -15,6 +15,7 @@ class gui():
 		self.coordinate1 = None
 		self.coordinate2 = None
 		self.press_count = 0
+		self.event = None
 
 		#colours
 		self.black = (0, 0, 0)
@@ -32,7 +33,7 @@ class gui():
 		#board (coordinate), (dimensions): (631,632)
 
 
-		pygame.display.set_caption('PyChess')
+		pygame.display.set_caption('Tim Chess')
 		clock = pygame.time.Clock()
 		gui_board = pygame.image.load('assets/board.png')
 
@@ -67,8 +68,8 @@ class gui():
 
 		crashed = False
 		while not crashed:
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
+			for self.event in pygame.event.get():
+				if self.event.type == pygame.QUIT:
 					crashed = True
 
 			self.gameDisplay.blit(gui_board, (0,0))
@@ -83,22 +84,12 @@ class gui():
 				self.__getSelection()
 
 			elif content == 'chooseWhite':
-				piece_pick_load('white')
-				result = None
-				while result == None:
-					result = self.__choose_square()
+				self.piece_pick_load('white')
+				self.__choose_square()
 
-			f = open('move.txt','w')
-			f.write(result)
-
-			elif ccontent == 'chooseBlack':
-				piece_pick_load('black')
-				result = None
-				while result == None:
-					result = self.__choose_square()
-
-			f = open('move.txt','w')
-			f.write(result)
+			elif content == 'chooseBlack':
+				self.piece_pick_load('black')
+				self.__choose_square()
 
 			pygame.display.update()
 			clock.tick(60)
@@ -144,11 +135,11 @@ class gui():
 				self.press_count = 3
 
 		elif self.press_count == 1:
-			if event.type == pygame.MOUSEBUTTONUP:
+			if self.event.type == pygame.MOUSEBUTTONUP:
 				self.press_count = 2
 
 		elif self.press_count == 3:
-			if event.type == pygame.MOUSEBUTTONUP:
+			if self.event.type == pygame.MOUSEBUTTONUP:
 				self.press_count = 0
 
 	def __getmouse(self):
@@ -185,34 +176,46 @@ class gui():
 		img = font.render('90:30', True, self.grey)
 		self.gameDisplay.blit(img, (631,20))
 
-	def __choose_square():
-		if self.press_count == 0:
+	def __choose_square(self):
+		if self.press_count == 3:
 			if pygame.mouse.get_pressed() == (True, False, False):
-				self.coordinate = pygame.mouse.get_pos()
+				coordinate = pygame.mouse.get_pos()
+				print(coordinate)
+				result = None
+
+				x = coordinate[0]
+				y = coordinate[1]
+				if 125 < y < 195 or 440 < y < 510:
+					if 166< x < 250:
+						result = 'N'
+
+					elif 250 < x < 322:
+						result = 'B'
+
+					elif 322 < x < 394:
+						result = 'R'
+
+					elif 394 < x < 466:
+						result = 'Q'
+
+					else:
+						result = None
+
+					print(result)
+
+					if result != None:
+						print(result)
+						f = open('move.txt','w')
+						f.write(result)
+						f.close()
 				
-				self.press_count = 1
+					self.press_count = 1
 
 		elif self.press_count == 1:
-			if event.type == pygame.MOUSEBUTTONUP:
+			if self.event.type == pygame.MOUSEBUTTONUP:
 				self.press_count = 0
 
-		x = coordinate[0]
-		y = coordinate[1]
-		if 125 < y < 195 or 440 < y < 510:
-			if 166< x < 250:
-				return ('N')
-
-			elif 250 < x < 322:
-				return('B')
-
-			elif 322 < x < 394:
-				return('R')
-
-			elif 394 < x < 366:
-				return('Q')
-
-			else:
-				return(None)
+		return None
 
 	def __quit(self):
 		pygame.quit()

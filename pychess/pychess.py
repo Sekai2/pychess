@@ -498,6 +498,43 @@ class ChessBoard():
 	def final_update(self, colour, piece):
 		pass
 
+	def __choose_piece_change(self, colour, location):
+		f = open('move.txt', 'w')
+		if colour == 'white':
+			f.write('chooseWhite')
+			print('wrote')
+
+		elif colour == 'black':
+			f.write('chooseBlack')
+
+		f.close()
+
+		valid = 'NBRQ'
+
+		transform = 'a'
+		while transform not in valid:
+			time.sleep(0.001)
+			f = open('move.txt', 'r')
+			transform = f.read()
+			f.close()
+
+		print(transform)
+
+		if transform == 'N':
+			piece = Knight(colour, location)
+
+		elif transform == 'B':
+			piece = Bishop(colour, location)
+
+		elif transform == 'R':
+			piece = Rook(colour, location)
+
+		elif transform == 'Q':
+			piece = Queen(colour, location)
+
+		return piece
+
+
 	def __revert(self, location1, location2, piece2):
 		self.board[location1] = self.board[location2]
 		self.board[location1].location = location1
@@ -510,11 +547,35 @@ class ChessBoard():
 			self.board[i].block_update(location2, location1)
 
 	def __update_Board(self, location1, location2, colour, piece1, piece2, stop_rvt):
-		self.board[location2] = self.board[location1]
-		self.board[location1] = None
-		self.board[location2].location = location2
-		self.board[location2].update_ADSquares()
-		self.update_locations(self.board[location2], location1)
+		if type(piece1) == Pawn:
+			if piece1.colour == 'white':
+				OpRank = 0
+
+			elif piece1.colour == 'black':
+				OpRank = 7
+
+			if board_rank(location2) == OpRank:
+				print('changing')
+				self.board[location2] = self.__choose_piece_change(colour, location2)
+				print('piece selected')
+				self.board[location1] = None
+				self.board[location2].location = location2
+				self.board[location2].update_ADSquares()
+				self.update_locations(self.board[location2], location1)
+
+			else:
+				self.board[location2] = self.board[location1]
+				self.board[location1] = None
+				self.board[location2].location = location2
+				self.board[location2].update_ADSquares()
+				self.update_locations(self.board[location2], location1)
+
+		else:
+			self.board[location2] = self.board[location1]
+			self.board[location1] = None
+			self.board[location2].location = location2
+			self.board[location2].update_ADSquares()
+			self.update_locations(self.board[location2], location1)
 
 		if type(piece1) == King:
 			self.board[location2].Kcastling = False
