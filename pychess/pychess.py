@@ -400,7 +400,7 @@ class FEN():
 							else:
 								location = i - 16
 
-							enPassant_location = file_letter(location) + rank_num(location)
+							#enPassant_location = file_letter(location) + rank_num(location)
 
 			elif i % 16 == 8:
 				if count != 0:
@@ -443,7 +443,6 @@ class FEN():
 		FEN_code += str(fullmove_clock)
 
 		return FEN_code
-
 
 #Board Class
 class ChessBoard():
@@ -1142,25 +1141,30 @@ class node():
 							tempBoard = copy.deepcopy(self.val)
 							if tempBoard.move(i.location, i.location + 16, colour, False) == True:
 								self.append(node(tempBoard))
+								self.validate(self.val, i.location, i.location + 16, colour)
 
 							tempBoard = copy.deepcopy(self.val)
 							if tempBoard.move(i.location, i.location + 32, colour, False) == True:
 								self.append(node(tempBoard))
+								self.validate(self.val, i.location, i.location + 32, colour)
 
 						if colour == 'white':
 							tempBoard = copy.deepcopy(self.val)
 							if tempBoard.move(i.location, i.location - 16, colour, False) == True:
 								self.append(node(tempBoard))
+								self.validate(self.val, i.location, i.location - 16, colour)
 
 							tempBoard = copy.deepcopy(self.val)
 							if tempBoard.move(i.location, i.location - 32, colour, False) == True:
 								self.append(node(tempBoard))
+								self.validate(self.val, i.location, i.location - 32, colour)
 
 					elif type(i) == King:
 						for j in i.ADSquares:
 							tempBoard = copy.deepcopy(self.val)
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard))
+								self.validate(self.val, i.location, j, colour)
 
 						if i.colour == 'white':
 							if i.location == 116:
@@ -1168,11 +1172,13 @@ class node():
 									tempBoard = copy.deepcopy(self.val)
 									if tempBoard.move(116, 114, colour, False) == True:
 										self.append(node(tempBoard))
+										self.validate(self.val, 116, 114, colour)
 
 								if i.Kcastling == True:
 									tempBoard = copy.deepcopy(self.val)
 									if tempBoard.move(116, 118, colour, False) == True:
 										self.append(node(tempBoard))
+										self.validate(self.val, 116, 118, colour)
 
 						if i.colour == 'black':
 							if i.location == 4:
@@ -1180,24 +1186,38 @@ class node():
 									tempBoard = copy.deepcopy(self.val)
 									if tempBoard.move(4, 2, colour, False) == True:
 										self.append(node(tempBoard))
+										self.validate(self.val, 4, 2, colour)
 
 								if i.Kcastling == True:
 									tempBoard = copy.deepcopy(self.val)
 									if tempBoard.move(4, 2, colour, False) == True:
 										self.append(node(tempBoard))
-
+										self.validate(self.val, 4, 2, colour)
 
 					else:
 						for j in i.ADSquares:
 							tempBoard = copy.deepcopy(self.val)
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard))
+								self.validate(self.val, i.location, j, colour)
+
+	def validate(self, board, a, b, colour):
+		FEN_code = FEN()
+		chess_board = chess.Board(FEN_code.notate(board, colour))
+		#print(chess_board)
+		move = file_letter(a) + rank_num(a) + file_letter(b) + rank_num(b)
+		if chess.Move.from_uci(move) in chess_board.legal_moves == False:
+			print('s')
+			f.open('bandBoard.txt', 'a')
+			f.write(FEN_code.notate(board.board, colour) + '\n' + move + '\n')
+			f.close()
+
 
 	def count(self, node, ply, target_ply):
 		if ply == target_ply:
 			self.descendants += 1
 			FEN_code = FEN()
-			print(FEN_code.notate(node.val, 'black'))
+			#print(FEN_code.notate(node.val, 'black'))
 
 		for i in node.children:
 			self.count(i, ply + 1, target_ply)
@@ -1347,11 +1367,9 @@ def game():
 						colour2 = 'white'
 
 					else:
-						print('a')
 						print('That is not an option')
 
 				except:
-					print('b')
 					print('That is not an option')
 
 				player1 = human(colour1)
