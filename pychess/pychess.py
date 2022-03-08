@@ -1209,8 +1209,14 @@ class node():
 		if chess.Move.from_uci(move) in chess_board.legal_moves == False:
 			print('s')
 			f.open('bandBoard.txt', 'a')
-			f.write(FEN_code.notate(board.board, colour) + '\n' + move + '\n')
+			f.write(FEN_code.notate(board, colour) + '\n' + move + '\n')
 			f.close()
+
+		else:
+			f = open('generated.txt','a')
+			f.write(FEN_code.notate(board, colour) + '\n' + move + '\n')
+			f.close()
+
 
 
 	def count(self, node, ply, target_ply):
