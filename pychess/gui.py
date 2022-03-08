@@ -98,7 +98,7 @@ class gui():
 		f = open('board.txt', 'r')
 		board = f.read()
 		f.close()
-		piece_characters = 'pbnrqkPBNRQK'
+		piece_characters = 'PBNRQKpbnrqk'
 		for i in range(len(board)):
 			if (i & 0x88) == 0:
 				if board[i] != 'o':

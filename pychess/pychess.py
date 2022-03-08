@@ -3,6 +3,7 @@ import os
 import math
 import random
 import copy
+import chess
 
 from misc import *
 from score import *
@@ -80,7 +81,7 @@ class Pawn(Piece):
 		self.value = 1
 		self.character = 'P'
 		self.double_move = False
-		if self.colour == 'white':
+		if self.colour == 'black':
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
@@ -113,12 +114,14 @@ class Pawn(Piece):
 		if board_file(self.location) == board_file(destination):
 			if board_rank(self.location) == 1:
 				if board_rank(destination) - board_rank(self.location) <= 2:
-					self.double_move = True
+					if board_rank(destination) - board_rank(self.location) == 2:
+						self.double_move = True
 					return True
 
 			elif board_rank(self.location) == 6:
 				if board_rank(self.location) - board_rank(destination) <= 2:
-					self.double_move = True
+					if board_rank(self.location) - board_rank(destination) == 2:
+						self.double_move = True
 					return True
 
 			elif abs(board_rank(destination) - board_rank(self.location)) == 1:
@@ -164,7 +167,7 @@ class Knight(Piece):
 		Piece.__init__(self, colour, location)
 		self.value = 3
 		self.character = 'N'
-		if self.colour == 'white':
+		if self.colour == 'black':
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
@@ -179,7 +182,7 @@ class Bishop(Piece):
 		Piece.__init__(self, colour, location)
 		self.value = 3
 		self.character = 'B'
-		if self.colour == 'white':
+		if self.colour == 'black':
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
@@ -194,7 +197,7 @@ class Rook(Piece):
 		self.value = 5
 		self.character = 'R'
 
-		if self.colour == 'white':
+		if self.colour == 'black':
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
@@ -208,7 +211,7 @@ class Queen(Piece):
 		Piece.__init__(self, colour, location)
 		self.value = 9
 		self.character = 'Q'
-		if self.colour == 'white':
+		if self.colour == 'black':
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
@@ -224,7 +227,7 @@ class King(Piece):
 		self.character = 'K'
 		self.Qcastling = True
 		self.Kcastling = True
-		if self.colour == 'white':
+		if self.colour == 'black':
 			self.character = self.character.lower()
 
 	def update_ADSquares(self):
@@ -367,8 +370,80 @@ class FEN():
 			else:
 				return(board)
 
-	def notate(self, board):
-		pass
+	def notate(self, board, turn):
+		count = 0
+		FEN_code = ''
+		enPassant_location = None
+		halfmove_clock = board.halfmove_clock
+		fullmove_clock = board.fullmove_clock
+		for i in range(len(board.board)):
+			if i % 16 < 8:
+				if count != 0:
+					if board.board[i] != None:
+						FEN_code += str(count)
+						count = 0
+						FEN_code += board.board[i].character
+
+					else:
+						count += 1
+
+				elif board.board[i] == None:
+					count = 1
+
+				else:
+					FEN_code += board.board[i].character
+					if type(board.board[i]) == Pawn:
+						if board.board[i].double_move == True:
+							if board.board[i].colour == 'white':
+								location = i + 16
+
+							else:
+								location = i - 16
+
+							enPassant_location = file_letter(location) + rank_num(location)
+
+			elif i % 16 == 8:
+				if count != 0:
+					FEN_code += str(count)
+					count = 0
+				FEN_code += '/'
+
+		FEN_code += ' '
+
+		if turn == 'black':
+			FEN_code += 'b '
+
+		else:
+			FEN_code += 'w '
+
+		if board.board[board.Wking_location].Kcastling == True:
+			FEN_code += 'K'
+
+		if board.board[board.Wking_location].Qcastling == True:
+			FEN_code += 'Q'
+
+		if board.board[board.Bking_location].Kcastling == True:
+			FEN_code += 'k'
+
+		if board.board[board.Bking_location].Qcastling == True:
+			FEN_code += 'q'
+
+		FEN_code += ' '
+
+		if enPassant_location != None:
+			FEN_code += enPassant_location
+
+		else:
+			FEN_code += '- '
+
+		FEN_code += str(halfmove_clock)
+
+		FEN_code += ' '
+
+		FEN_code += str(fullmove_clock)
+
+		return FEN_code
+
 
 #Board Class
 class ChessBoard():
@@ -379,6 +454,8 @@ class ChessBoard():
 		self.Wking_location = 116
 		self.Bking_location = 4
 
+		self.fullmove_clock = 1
+		self.halfmove_clock = 0
 
 		if board == 'standard':
 			self.board = FEN_code.load('standard')
@@ -751,6 +828,23 @@ class ChessBoard():
 									result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
 									if revert == True:
 										self.__revert(location1, location2, piece2)
+
+									if result == True:
+										if piece2 != None:
+											self.halfmove_clock = 0
+
+										elif type(piece1) == Pawn:
+											self.halfmove_clock = 0
+
+										else:
+											self.halfmove_clock += 1
+
+										if colour == 'black':
+											self.fullmove_clock += 1
+
+										if self.halfmove_clock == 50:
+											result = 'end'
+
 									return result
 
 								else:
@@ -760,12 +854,45 @@ class ChessBoard():
 									else:
 										result = self.castle(piece1, location2)
 
+									if result == True:
+										if piece2 != None:
+											self.halfmove_clock = 0
+
+										elif type(piece1) == Pawn:
+											self.halfmove_clock = 0
+
+										else:
+											self.halfmove_clock += 1
+											
+										if colour == 'black':
+											self.fullmove_clock += 1
+
+										if self.halfmove_clock == 50:
+											result = 'end'
+									
 									return result
 
 							elif location2 in piece1.ADSquares:
 								result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
 								if revert == True:
 										self.__revert(location1, location2, piece2)
+
+								if result == True:
+									if piece2 != None:
+										self.halfmove_clock = 0
+
+									elif type(piece1) == Pawn:
+										self.halfmove_clock = 0
+
+									else:
+										self.halfmove_clock += 1
+											
+									if colour == 'black':
+										self.fullmove_clock += 1
+
+									if self.halfmove_clock == 50:
+										result = 'end'
+									
 								return result
 
 						else:
@@ -775,6 +902,23 @@ class ChessBoard():
 									result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
 									if revert == True:
 										self.__revert(location1, location2, piece2)
+
+									if result == True:
+										if piece2 != None:
+											self.halfmove_clock = 0
+
+										elif type(piece1) == Pawn:
+											self.halfmove_clock = 0
+
+										else:
+											self.halfmove_clock += 1
+											
+										if colour == 'black':
+											self.fullmove_clock += 1
+
+										if self.halfmove_clock == 50:
+											result = 'end'
+										
 									return result
 
 								elif piece1.enPassant(location2) != 0:
@@ -783,6 +927,23 @@ class ChessBoard():
 									result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
 									if revert == True:
 										self.__revert(location1, location2, piece2)
+
+									if result == True:
+										if piece2 != None:
+											self.halfmove_clock = 0
+
+										elif type(piece1) == Pawn:
+											self.halfmove_clock = 0
+
+										else:
+											self.halfmove_clock += 1
+											
+										if colour == 'black':
+											self.fullmove_clock += 1
+
+										if self.halfmove_clock == 50:
+											result = 'end'
+										
 									return result
 
 							else:
@@ -790,6 +951,23 @@ class ChessBoard():
 									result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
 									if revert == True:
 										self.__revert(location1, location2, piece2)
+
+									if result == True:
+										if piece2 != None:
+											self.halfmove_clock = 0
+
+										elif type(piece1) == Pawn:
+											self.halfmove_clock = 0
+
+										else:
+											self.halfmove_clock += 1
+											
+										if colour == 'black':
+											self.fullmove_clock += 1
+
+										if self.halfmove_clock == 50:
+											result = 'end'
+										
 									return result
 		return False
 
@@ -922,11 +1100,19 @@ class human(player):
 			elif moveResult == 'checkmate':
 				return True
 
+			elif moveResult == 'end':
+				return True
+
 			else:
 				print('turn over')
 				f = open('move.txt','w')
 				f.write('complete')
 				f.close()
+				FEN_code = FEN()
+				colour = 'white'
+				if self.colour == 'white':
+					colour = 'black'
+				print(FEN_code.notate(board1, colour))
 
 		except:
 			f = open('move.txt','w')
@@ -1009,7 +1195,9 @@ class node():
 
 	def count(self, node, ply, target_ply):
 		if ply == target_ply:
-				self.descendants += 1
+			self.descendants += 1
+			FEN_code = FEN()
+			print(FEN_code.notate(node.val, 'black'))
 
 		for i in node.children:
 			self.count(i, ply + 1, target_ply)
