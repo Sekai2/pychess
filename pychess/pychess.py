@@ -1201,6 +1201,11 @@ class node():
 								self.append(node(tempBoard))
 								self.validate(self.val, i.location, j, colour)
 
+							elif type(i) == Rook:
+								if i.location == 112:
+									print(tempBoard.move(i.location,j,colour,False))
+									print(j)
+
 	def validate(self, board, a, b, colour):
 		FEN_code = FEN()
 		chess_board = chess.Board(FEN_code.notate(board, colour))
