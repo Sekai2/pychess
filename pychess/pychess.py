@@ -1,7 +1,6 @@
 import time
 import os
 import math
-import random
 import copy
 import chess
 
@@ -1197,6 +1196,8 @@ class node():
 					else:
 						for j in i.ADSquares:
 							tempBoard = copy.deepcopy(self.val)
+							if type(i) == Rook:
+								print(file_letter(i.location)+rank_num(i.location)+file_letter(j)+rank_num(j))
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard))
 								self.validate(self.val, i.location, j, colour)
