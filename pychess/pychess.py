@@ -3,6 +3,7 @@ import os
 import math
 import copy
 import chess
+import PRNG
 
 from misc import *
 from score import *

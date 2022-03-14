@@ -6,6 +6,7 @@ class PRNG():
 		self.seedn = seed
 
 	#Linear Conguential Generator
+	#default is random 31 bit number
 	def LCG(maxn = 1, seedn = int(time.time_ns()), m = 2147483647, a = 16807, c = 1, n = 0, result = []):
 		if n == maxn:
 			return result
@@ -13,4 +14,7 @@ class PRNG():
 		result.append(randnum)
 		return(PRNG.LCG(maxn, randnum, m, a, c, n + 1, result))
 
-print(PRNG.LCG(100))
+	def LCGbetween(lower1, upper1, maxn = 1, seedn = int(time.time_ns())):
+		rand_range = upper1 - lower1
+		a = (upper1 + lower1)//2
+		return LCG(maxn, seedn, rand_range, a, lower1)
