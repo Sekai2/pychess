@@ -1,22 +1,12 @@
 from PRNG import *
 #zobrist hashing class
-class zobrist():
+class hashTable():
 	def __init__(self, seed = time.time_ns()):
-		self.white_pawn = 1
-		self.white_rook = 2
-		self.white_bishop = 3
-		self.white_knight = 4
-		self.white_queen = 5
-		self.white_king = 6
-		self.black_pawn = 7
-		self.black_rook = 8
-		self.black_bishop = 9
-		self.black_knight = 10
-		self.black_queen = 11
-		self.black_king = 12
-		self.random_val = PRNG.LCG(768, seed)
+		self.constVal = [0,1,2,3,4,5,6,7,8,9,10,11]
+		self.pieceChar = 'PRBNQKprbnqk'
+		self.random_val = PRNG.LCG(768, seed, 18446744073709551557, 13891176665706064842)
 		self.table = []
-		self.black_move = PRNG.LCG(1)
+		self.black_move = PRNG.LCG(1, 4829959, 18446744073709551557,13891176665706064842)
 
 	def init_zobrist(self):
 		self.table = []
@@ -29,10 +19,18 @@ class zobrist():
 			for j in range(12):
 				self.table[i][j] = self.random_val[i*j]
 
-	def hash(borad):
+	def hash(self, board, colour):
 		h = 0
+		if colour == 'black':
+			h = h ^ self.black_move
 
+		p = 0
+		for i in range(128):
+			if i % 16 < 9:
+				if board.board[i] != None:
+					j = self.constVal[self.pieceChar.index(board.board[i].character)]
+					h = h ^ self.table[p][j]
 
-zob = zobrist()
-zob.init_zobrist()
-print(zob.black_move)
+			p += 1
+
+		return h

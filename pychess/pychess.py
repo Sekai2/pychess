@@ -3,10 +3,11 @@ import os
 import math
 import copy
 import chess
-import PRNG
 
 from misc import *
 from score import *
+from PRNG import *
+from zorbristHash import *
 
 #parent class for all piece types
 class Piece():
@@ -1404,6 +1405,16 @@ def game():
 			cpu1 = computer('white')
 			print('1st move count: ')
 			print(cpu1.test())
+
+		elif menu == '4':
+			print('///////////zobrist test mode////////////')
+			hashBoard = hashTable()
+			hashBoard.init_zobrist()
+			hashedBoard = hashBoard.hash(board1, 'white')
+			print(hashedBoard)
+
+
+
 
 		else:
 			print('that is not an option')
