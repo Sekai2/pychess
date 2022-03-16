@@ -25,12 +25,15 @@ class hashTable():
 			h = h ^ self.black_move
 
 		p = 0
+		print(len(board.board))
+		for i in range(128):
+			print(board.board[i])
 		for i in range(128):
 			if i % 16 < 9:
 				if board.board[i] != None:
 					j = self.constVal[self.pieceChar.index(board.board[i].character)]
 					h = h ^ self.table[p][j]
 
-			p += 1
+				p += 1
 
 		return h

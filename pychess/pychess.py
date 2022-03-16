@@ -309,7 +309,7 @@ class FEN():
 		digits = '12345678'
 		board = []
 		for i in FEN_code:
-			if i == '/':
+			if i == '/' or i == ' ':
 				for i in range(8):
 					board.append(None)
 			elif i == 'r':
