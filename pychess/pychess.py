@@ -17,8 +17,6 @@ class Piece():
 		self.ADSquares = []
 		self.hashval = 0
 
-	#diagonal sliding for queens and bishops
-
 	def clean(self):
 		#deletes repeats from ADSquares
 		for i in self.ADSquares:
@@ -817,6 +815,7 @@ class ChessBoard():
 	def move(self, location1, location2, colour, revert):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
+		print(piece1.ADSquares)
 
 		if piece1 != None:
 			if self.offBoardCheck(location2) == True:
@@ -1059,6 +1058,12 @@ class ChessBoard():
 					elif count == 3:
 						direction = -1
 
+	def copyBoard(self):
+		newBoard = []
+		for i in self.board:
+			if i != None:
+				pieces.append()
+
 #player class
 class player():
 	def __init__(self):
@@ -1133,6 +1138,7 @@ class node():
 	def append(self, child):
 		self.children.append(child)
 
+	#child generation algorithm for node
 	def generate(self, colour):
 		for i in self.val.board:
 			if i != None:
@@ -1198,16 +1204,9 @@ class node():
 					else:
 						for j in i.ADSquares:
 							tempBoard = copy.deepcopy(self.val)
-							if type(i) == Rook:
-								print(file_letter(i.location)+rank_num(i.location)+file_letter(j)+rank_num(j))
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard))
 								self.validate(self.val, i.location, j, colour)
-
-							elif type(i) == Rook:
-								if i.location == 112:
-									print(tempBoard.move(i.location,j,colour,False))
-									print(j)
 
 	def validate(self, board, a, b, colour):
 		FEN_code = FEN()
@@ -1225,8 +1224,7 @@ class node():
 			f.write(FEN_code.notate(board, colour) + '\n' + move + '\n')
 			f.close()
 
-
-
+	#tree traversal algorithm
 	def count(self, node, ply, target_ply):
 		if ply == target_ply:
 			self.descendants += 1
@@ -1412,9 +1410,6 @@ def game():
 			hashBoard.init_zobrist()
 			hashedBoard = hashBoard.hash(board1, 'white')
 			print(hashedBoard)
-
-
-
 
 		else:
 			print('that is not an option')
