@@ -3,6 +3,7 @@ import os
 import math
 import copy
 import chess
+import random
 
 from misc import *
 from score import *
@@ -1139,11 +1140,14 @@ class node():
 	def __init__(self, val):
 		self.val = val
 		self.children = []
+		self.move = (0,0)#move that results in board stored in val
 		self.hash = None
-		self.visited = False
 		self.descendants = 0
+		self.colour = ''#colour of turn to result in board stored in val
 
-	def append(self, child):
+	def append(self, child, move, colour):
+		child.move = move
+		child.colour = colour
 		self.children.append(child)
 
 	#child generation algorithm for node
@@ -1155,72 +1159,72 @@ class node():
 						if colour == 'black':
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location + 16, colour, False) == True:
-								self.append(node(tempBoard))
-								self.validate(self.val, i.location, i.location + 16, colour)
+								self.append(node(tempBoard), (i.location, i.location + 16), colour)
+								#self.validate(self.val, i.location, i.location + 16, colour)
 
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location + 32, colour, False) == True:
-								self.append(node(tempBoard))
-								self.validate(self.val, i.location, i.location + 32, colour)
+								self.append(node(tempBoard), (i.location, i.location + 32), colour)
+								#self.validate(self.val, i.location, i.location + 32, colour)
 
 						elif colour == 'white':
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location - 16, colour, False) == True:
-								self.append(node(tempBoard))
-								self.validate(self.val, i.location, i.location - 16, colour)
+								self.append(node(tempBoard), (i.location, i.location - 16), colour)
+								#self.validate(self.val, i.location, i.location - 16, colour)
 
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location - 32, colour, False) == True:
-								self.append(node(tempBoard))
-								self.validate(self.val, i.location, i.location - 32, colour)
+								self.append(node(tempBoard), (i.location, i.location - 32), colour)
+								#self.validate(self.val, i.location, i.location - 32, colour)
 
 						for j in i.ADSquares:
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
-								self.append(node(tempBoard))
-								self.validate(self.val, i.location, j, colour)
+								self.append(node(tempBoard), (i.location, j), colour)
+								#self.validate(self.val, i.location, j, colour)
 
 					elif type(i) == King:
 						for j in i.ADSquares:
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
-								self.append(node(tempBoard))
-								self.validate(self.val, i.location, j, colour)
+								self.append(node(tempBoard), (i.location, j), colour)
+								#self.validate(self.val, i.location, j, colour)
 
 						if i.colour == 'white':
 							if i.location == 116:
 								if i.Qcastling == True:
 									tempBoard = self.val.copyBoard()
 									if tempBoard.move(116, 114, colour, False) == True:
-										self.append(node(tempBoard))
-										self.validate(self.val, 116, 114, colour)
+										self.append(node(tempBoard), (116, 114), colour)
+								#		self.validate(self.val, 116, 114, colour)
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
 									if tempBoard.move(116, 118, colour, False) == True:
-										self.append(node(tempBoard))
-										self.validate(self.val, 116, 118, colour)
+										self.append(node(tempBoard), (116, 118), colour)
+								#		self.validate(self.val, 116, 118, colour)
 
 						if i.colour == 'black':
 							if i.location == 4:
 								if i.Qcastling == True:
 									tempBoard = self.val.copyBoard()
 									if tempBoard.move(4, 2, colour, False) == True:
-										self.append(node(tempBoard))
-										self.validate(self.val, 4, 2, colour)
+										self.append(node(tempBoard), (4, 2), colour)
+								#		self.validate(self.val, 4, 2, colour)
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
-									if tempBoard.move(4, 2, colour, False) == True:
-										self.append(node(tempBoard))
-										self.validate(self.val, 4, 2, colour)
+									if tempBoard.move(4, 7, colour, False) == True:
+										self.append(node(tempBoard), (4, 7), colour)
+								#		self.validate(self.val, 4, 7, colour)
 
 					else:
 						for j in i.ADSquares:
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
-								self.append(node(tempBoard))
-								self.validate(self.val, i.location, j, colour)
+								self.append(node(tempBoard), (i.location, j), colour)
+								#self.validate(self.val, i.location, j, colour)
 
 	def validate(self, board, a, b, colour):
 		FEN_code = FEN()
@@ -1256,9 +1260,22 @@ class computer(player):
 		self.max_depth = 2
 
 	def turn(self):
-		rootNode = node(board1.board)
-		grow(rootNode, 0, max_depth,self.colour)
-		minimax(self, 1, rootNode, 0, self.max_depth, False, self.colour)
+		rootNode = node(board1)
+		self.grow(rootNode, 0, 2, self.colour)
+		#minimax(self, 1, rootNode, 0, self.max_depth, False, self.colour)
+		nextNode = rootNode.children[random.randrange(len(rootNode.children))]
+		moveResult = board1.move(nextNode.move[0], nextNode.move[1], nextNode.colour, False)
+		if moveResult == 'checkmate':
+			return True
+
+		elif moveResult == 'end':
+			return True
+		FEN_code = FEN()
+		colour = 'white'
+		if self.colour == 'white':
+			colour = 'black'
+		print(FEN_code.notate(board1, colour))
+		board1.write_board()
 
 	def evaluate(self):
 		if self.colour == 'white':
@@ -1374,17 +1391,17 @@ def game():
 			valid = True
 			print('playing against computer')
 			loop = True
-			colour = input('Select your side w/b:\n')
 			while loop == True:
+				colour = input('Select your side w/b:\n')
 				try:
 					print('testing')
-					if colour.lower == 'w':
+					if colour.lower() == 'w':
 						loop = False
 						print('Playing as white')
 						colour1 = 'white'
 						colour2 = 'black'
 
-					elif colour.lower == 'b':
+					elif colour.lower() == 'b':
 						loop = False
 						print('Playing as black')
 						colour1 = 'black'
@@ -1396,19 +1413,19 @@ def game():
 				except:
 					print('That is not an option')
 
-				player1 = human(colour1)
-				player2 = computer(colour2)
-				end = False
-				endColour = 'white'
-				while end != True:
-					end = player1.turn()
-					if end != True:
-						end = player2.turn()
+			player1 = human(colour1)
+			player2 = computer(colour2)
+			end = False
+			endColour = 'white'
+			while end != True:
+				end = player1.turn()
+				if end != True:
+					end = player2.turn()
 
-					else:
-						endColour = 'black'
+				else:
+					endColour = 'black'
 
-				endGame(endColour)
+			endGame(endColour)
 
 		elif menu == '3':
 			print('///////////computer test mode///////////')
