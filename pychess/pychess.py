@@ -1242,7 +1242,6 @@ class node():
 		if ply == target_ply:
 			self.descendants += 1
 			FEN_code = FEN()
-			print(FEN_code.notate(node.val, 'white'))
 
 		for i in node.children:
 			self.count(i, ply + 1, target_ply)
