@@ -24,16 +24,16 @@ class Piece():
 			 	for j in range(self.ADSquares.count(i)-1):
 			 		self.ADSquares.remove(i)
 
-	def update_slide(self, location, direction, squares):
+	def update_slide(self, location, direction, squares, chessBoard):
 
 		#updates ADSqures for a single line/direction
 		location = location + direction
-		if board1.offBoardCheck(location) == True:
-			if board1.board[location] == None:
+		if chessBoard.offBoardCheck(location) == True:
+			if chessBoard.board[location] == None:
 				if location in squares:
 					squares.remove(location)
 				squares.append(location)
-				self.update_slide(location, direction, squares)
+				self.update_slide(location, direction, squares, chessBoard)
 			squares.append(location)
 
 		return(squares)
@@ -60,15 +60,15 @@ class Piece():
 
 			return direction
 
-	def block_update(self, location1, location2):
+	def block_update(self, location1, location2, chessBoard):
 		#updates ADSquares for sliding pieces when blocking pieces are moved or pieces are moved into slide line
 		if location2 in self.ADSquares:
-			self.update_ADSquares()
+			self.update_ADSquares(chessBoard)
 
 		else:
 			direction = self.id_direction(location1)
 			if direction != None:
-				self.ADSquares = self.update_slide(self.location, direction, self.ADSquares)
+				self.ADSquares = self.update_slide(self.location, direction, self.ADSquares, chessBoard)
 
 		self.clean()
 
@@ -83,7 +83,7 @@ class Pawn(Piece):
 		if self.colour == 'black':
 			self.character = self.character.lower()
 
-	def update_ADSquares(self):
+	def update_ADSquares(self, chessBoard):
 		if self.colour == 'white':
 			direction = -1
 
@@ -94,10 +94,10 @@ class Pawn(Piece):
 		square2 = self.location + (16*direction) + 1
 
 		self.ADSquares = []
-		if board1.offBoardCheck(square1) == True:
+		if chessBoard.offBoardCheck(square1) == True:
 			self.ADSquares.append(square1)
 
-		if board1.offBoardCheck(square2) == True:
+		if chessBoard.offBoardCheck(square2) == True:
 			self.ADSquares.append(square2)
 
 	def movePawn(self, destination):
@@ -128,7 +128,7 @@ class Pawn(Piece):
 
 		return False
 
-	def enPassant(self, destination):
+	def enPassant(self, destination, chessBoard):
 		#pawn specific method for moving a pawn using the en passant rule
 		if self.colour == 'white':
 			rank = 3
@@ -146,15 +146,13 @@ class Pawn(Piece):
 				if board_rank(i) == board_rank(self.location):
 					target = i
 
-		if target == None:
-			print('exit 0')
+		if chessBoard.board[target] == None:
 			return 0
 
 		if board_rank(destination) == board_rank(self.location) + direction:
-			if board1.board[target].colour != self.colour:
-				if type(board1.board[target]) == Pawn:
-					print(board1.board[target].double_move)
-					if board1.board[target].double_move == True:
+			if chessBoard.board[target].colour != self.colour:
+				if type(chessBoard.board[target]) == Pawn:
+					if chessBoard.board[target].double_move == True:
 						if board_rank(self.location) == rank:
 							if destination == (target + 16 * direction):
 								return i
@@ -169,11 +167,11 @@ class Knight(Piece):
 		if self.colour == 'black':
 			self.character = self.character.lower()
 
-	def update_ADSquares(self):
+	def update_ADSquares(self, chessBoard):
 		self.ADSquares = []
 		square_dif = [-33 ,-31 ,-18, -14, 14, 18, 31, 33]
 		for i in square_dif:
-			if board1.offBoardCheck(self.location + i) == True:
+			if chessBoard.offBoardCheck(self.location + i) == True:
 				self.ADSquares.append(self.location + i)
 
 class Bishop(Piece):
@@ -184,11 +182,11 @@ class Bishop(Piece):
 		if self.colour == 'black':
 			self.character = self.character.lower()
 
-	def update_ADSquares(self):
+	def update_ADSquares(self, chessBoard):
 		self.ADSquares = []
 		directions = [-17, -15, 15, 17]
 		for i in directions:
-			self.ADSquares = self.update_slide(self.location, i, self.ADSquares)
+			self.ADSquares = self.update_slide(self.location, i, self.ADSquares, chessBoard)
 
 class Rook(Piece):
 	def __init__(self, colour, location):
@@ -199,11 +197,11 @@ class Rook(Piece):
 		if self.colour == 'black':
 			self.character = self.character.lower()
 
-	def update_ADSquares(self):
+	def update_ADSquares(self, chessBoard):
 		self.ADSquares = []
 		directions = [-16, -1, 1, 16]
 		for i in directions:
-			self.ADSquares = self.update_slide(self.location, i, self.ADSquares)
+			self.ADSquares = self.update_slide(self.location, i, self.ADSquares, chessBoard)
 
 class Queen(Piece):
 	def __init__(self, colour, location):
@@ -213,11 +211,11 @@ class Queen(Piece):
 		if self.colour == 'black':
 			self.character = self.character.lower()
 
-	def update_ADSquares(self):
+	def update_ADSquares(self, chessBoard):
 		self.ADSquares = []
 		directions = [-17, -16, -15, -1, 1, 15, 16, 17]
 		for i in directions:
-			self.ADSquares = self.update_slide(self.location, i, self.ADSquares)
+			self.ADSquares = self.update_slide(self.location, i, self.ADSquares, chessBoard)
 
 class King(Piece):
 	def __init__(self, colour, location):
@@ -229,11 +227,11 @@ class King(Piece):
 		if self.colour == 'black':
 			self.character = self.character.lower()
 
-	def update_ADSquares(self):
+	def update_ADSquares(self, chessBoard):
 		self.ADSquares = []
 		directions = [-17, -16, -15, -1, 1, 15, 16, 17]
 		for i in directions:
-			if board1.offBoardCheck(self.location + i) == True:
+			if chessBoard.offBoardCheck(self.location + i) == True:
 				self.ADSquares.append(self.location + i)
 
 class FEN():
@@ -407,6 +405,8 @@ class FEN():
 					count = 0
 				FEN_code += '/'
 
+		FEN_code = FEN_code[:-1]
+
 		FEN_code += ' '
 
 		if turn == 'black':
@@ -458,8 +458,11 @@ class ChessBoard():
 		if board == 'standard':
 			self.board = FEN_code.load('standard')
 
-		else:
+		elif type(board) == list:
 			self.board = board
+
+		else:
+			self.board = FEN_code.load()
 
 		self.slideLocations = []
 		for i in self.board:
@@ -471,7 +474,7 @@ class ChessBoard():
 	def ADBoard_init(self):
 		for i in self.board:
 			if i != None:
-				i.update_ADSquares()
+				i.update_ADSquares(self)
 
 	def update_locations(self, piece, location1):
 		if type(piece) == Bishop or type(piece) == Rook or type(piece) == Queen:
@@ -517,7 +520,7 @@ class ChessBoard():
 		print(direction)
 
 		inLineSquares = []
-		inLineSquares = piece.update_slide(piece.location, direction, inLineSquares)
+		inLineSquares = piece.update_slide(piece.location, direction, inLineSquares, self)
 
 		print(inLineSquares)
 
@@ -616,10 +619,10 @@ class ChessBoard():
 		self.board[location2] = piece2
 		if self.board[location2] != None:
 			self.board[location2].location = location2
-		self.board[location1].update_ADSquares()
+		self.board[location1].update_ADSquares(self)
 		self.update_locations(self.board[location1], location2)
 		for i in self.slideLocations:
-			self.board[i].block_update(location2, location1)
+			self.board[i].block_update(location2, location1, self)
 
 	def __update_Board(self, location1, location2, colour, piece1, piece2, stop_rvt):
 		if type(piece1) == Pawn:
@@ -635,21 +638,21 @@ class ChessBoard():
 				print('piece selected')
 				self.board[location1] = None
 				self.board[location2].location = location2
-				self.board[location2].update_ADSquares()
+				self.board[location2].update_ADSquares(self)
 				self.update_locations(self.board[location2], location1)
 
 			else:
 				self.board[location2] = self.board[location1]
 				self.board[location1] = None
 				self.board[location2].location = location2
-				self.board[location2].update_ADSquares()
+				self.board[location2].update_ADSquares(self)
 				self.update_locations(self.board[location2], location1)
 
 		else:
 			self.board[location2] = self.board[location1]
 			self.board[location1] = None
 			self.board[location2].location = location2
-			self.board[location2].update_ADSquares()
+			self.board[location2].update_ADSquares(self)
 			self.update_locations(self.board[location2], location1)
 
 		if type(piece1) == King:
@@ -658,7 +661,7 @@ class ChessBoard():
 			#updating king index
 
 		for i in self.slideLocations:
-			self.board[i].block_update(location1, location2)
+			self.board[i].block_update(location1, location2, self)
 			squares = []
 			for i in self.board[i].ADSquares:
 				squares.append(file_letter(i) + rank_num(i))
@@ -772,14 +775,14 @@ class ChessBoard():
 		self.board[Rlocation2] = self.board[Rlocation1]
 		self.board[Rlocation1] = None
 		self.board[Rlocation2].location = Rlocation2
-		self.board[Klocation].update_ADSquares()
-		self.board[Rlocation2].update_ADSquares()
+		self.board[Klocation].update_ADSquares(self)
+		self.board[Rlocation2].update_ADSquares(self)
 
 		self.update_locations(self.board[Rlocation2], Rlocation1)
 
 		for i in self.slideLocations:
-			self.board[i].block_update(Rlocation1, Rlocation2)
-			self.board[i].block_update(Klocation1, Klocation)
+			self.board[i].block_update(Rlocation1, Rlocation2, self)
+			self.board[i].block_update(Klocation1, Klocation, self)
 
 		for i in self.board:
 			if i != None:
@@ -805,17 +808,16 @@ class ChessBoard():
 		self.board[Rlocation1] = self.board[Rlocation2]
 		self.board[Rlocation2] = None
 		self.board[Rlocation1].location = Rlocation1
-		self.board[location].update_ADSquares()
-		self.board[Rlocation1].update_ADSquares()
+		self.board[location].update_ADSquares(self)
+		self.board[Rlocation1].update_ADSquares(self)
 		self.update_locations(self.board[Rlocation1], Rlocation2)
 		for i in self.slideLocations:
-			self.board[i].block_update(Rlocation2, Rlocation1)
-			self.board[i].block_update(location, Klocation)
+			self.board[i].block_update(Rlocation2, Rlocation1, self)
+			self.board[i].block_update(location, Klocation, self)
 
 	def move(self, location1, location2, colour, revert):
 		piece1 = self.board[location1]
 		piece2 = self.board[location2]
-		print(piece1.ADSquares)
 
 		if piece1 != None:
 			if self.offBoardCheck(location2) == True:
@@ -920,8 +922,8 @@ class ChessBoard():
 										
 									return result
 
-								elif piece1.enPassant(location2) != 0:
-									take = piece1.enPassant(location2)
+								elif piece1.enPassant(location2, self) != 0:
+									take = piece1.enPassant(location2, self)
 									self.board[take] = None
 									result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
 									if revert == True:
@@ -1062,8 +1064,14 @@ class ChessBoard():
 		newBoard = []
 		for i in self.board:
 			if i != None:
-				pieces.append()
+				newBoard.append(copy.deepcopy(i))
 
+			else:
+				newBoard.append(None)
+
+		newChessBoard = copy.deepcopy(self)
+		newChessBoard.board = newBoard
+		return newChessBoard
 #player class
 class player():
 	def __init__(self):
@@ -1145,30 +1153,36 @@ class node():
 				if i.colour == colour:
 					if type(i) == Pawn:
 						if colour == 'black':
-							tempBoard = copy.deepcopy(self.val)
+							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location + 16, colour, False) == True:
 								self.append(node(tempBoard))
 								self.validate(self.val, i.location, i.location + 16, colour)
 
-							tempBoard = copy.deepcopy(self.val)
+							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location + 32, colour, False) == True:
 								self.append(node(tempBoard))
 								self.validate(self.val, i.location, i.location + 32, colour)
 
-						if colour == 'white':
-							tempBoard = copy.deepcopy(self.val)
+						elif colour == 'white':
+							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location - 16, colour, False) == True:
 								self.append(node(tempBoard))
 								self.validate(self.val, i.location, i.location - 16, colour)
 
-							tempBoard = copy.deepcopy(self.val)
+							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location - 32, colour, False) == True:
 								self.append(node(tempBoard))
 								self.validate(self.val, i.location, i.location - 32, colour)
 
+						for j in i.ADSquares:
+							tempBoard = self.val.copyBoard()
+							if tempBoard.move(i.location, j, colour, False) == True:
+								self.append(node(tempBoard))
+								self.validate(self.val, i.location, j, colour)
+
 					elif type(i) == King:
 						for j in i.ADSquares:
-							tempBoard = copy.deepcopy(self.val)
+							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard))
 								self.validate(self.val, i.location, j, colour)
@@ -1176,13 +1190,13 @@ class node():
 						if i.colour == 'white':
 							if i.location == 116:
 								if i.Qcastling == True:
-									tempBoard = copy.deepcopy(self.val)
+									tempBoard = self.val.copyBoard()
 									if tempBoard.move(116, 114, colour, False) == True:
 										self.append(node(tempBoard))
 										self.validate(self.val, 116, 114, colour)
 
 								if i.Kcastling == True:
-									tempBoard = copy.deepcopy(self.val)
+									tempBoard = self.val.copyBoard()
 									if tempBoard.move(116, 118, colour, False) == True:
 										self.append(node(tempBoard))
 										self.validate(self.val, 116, 118, colour)
@@ -1190,20 +1204,20 @@ class node():
 						if i.colour == 'black':
 							if i.location == 4:
 								if i.Qcastling == True:
-									tempBoard = copy.deepcopy(self.val)
+									tempBoard = self.val.copyBoard()
 									if tempBoard.move(4, 2, colour, False) == True:
 										self.append(node(tempBoard))
 										self.validate(self.val, 4, 2, colour)
 
 								if i.Kcastling == True:
-									tempBoard = copy.deepcopy(self.val)
+									tempBoard = self.val.copyBoard()
 									if tempBoard.move(4, 2, colour, False) == True:
 										self.append(node(tempBoard))
 										self.validate(self.val, 4, 2, colour)
 
 					else:
 						for j in i.ADSquares:
-							tempBoard = copy.deepcopy(self.val)
+							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard))
 								self.validate(self.val, i.location, j, colour)
@@ -1214,7 +1228,6 @@ class node():
 		#print(chess_board)
 		move = file_letter(a) + rank_num(a) + file_letter(b) + rank_num(b)
 		if chess.Move.from_uci(move) in chess_board.legal_moves == False:
-			print('s')
 			f.open('bandBoard.txt', 'a')
 			f.write(FEN_code.notate(board, colour) + '\n' + move + '\n')
 			f.close()
@@ -1229,7 +1242,7 @@ class node():
 		if ply == target_ply:
 			self.descendants += 1
 			FEN_code = FEN()
-			#print(FEN_code.notate(node.val, 'black'))
+			print(FEN_code.notate(node.val, 'white'))
 
 		for i in node.children:
 			self.count(i, ply + 1, target_ply)
@@ -1410,6 +1423,25 @@ def game():
 			hashBoard.init_zobrist()
 			hashedBoard = hashBoard.hash(board1, 'white')
 			print(hashedBoard)
+
+		elif menu == '5':
+			print(board1.move(16, 48, 'black', False))
+			#board1.move(0, 32, 'white', False)
+			board2 = board1.copyBoard()
+			board3 = copy.deepcopy(board1)
+			board3.ADBoard_init()
+			board1.print_board()
+			print(board1.board[0])
+			print(board1.board[0].ADSquares)
+			board2.print_board()
+			print(board2.board[0])
+			print(board2.board[0].ADSquares)
+			board3.print_board()
+			print(board3.board[0])
+			print(board3.board[0].ADSquares)
+			board3.move(96, 64, 'whtie', False)
+			board3.print_board()
+			print(board3.board[112].ADSquares)
 
 		else:
 			print('that is not an option')
