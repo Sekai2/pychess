@@ -1,9 +1,11 @@
 import time
-import os
 import math
 import copy
 import chess
 import random
+import subprocess
+import threading
+
 
 from misc import *
 from score import *
@@ -1359,6 +1361,9 @@ def endGame(colour):
 
 	quit()
 
+def startGui():
+	subprocess.run('python gui.pyw', shell = False)
+
 def game():
 	global board1
 	board1 = ChessBoard('standard')
@@ -1370,6 +1375,8 @@ def game():
 	while valid == False:
 		menu = input('Input 1 to play against a player\nInput 2 to play against computer\n\n')
 		if menu == '1':
+			guiThread = threading.Thread(target = startGui)
+			guiThread.start()
 			valid = True
 			print('playing against human')
 			player1 = human('white')
