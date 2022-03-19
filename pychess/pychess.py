@@ -6,7 +6,6 @@ import random
 import subprocess
 import threading
 
-
 from misc import *
 from score import *
 from PRNG import *
@@ -495,19 +494,14 @@ class ChessBoard():
 		#initiating check for check
 		if piece.colour == 'white':
 			if self.Bking_location in piece.ADSquares:
-				print('black in check')
 				return 'black'
 
 		else:
 			if self.Wking_location in piece.ADSquares:
-				print('white in check')
 				return 'white'
 		return False
 
 	def __checkmateCheck(self, colour, piece):
-		print('checking for Checkmate')
-		print(piece)
-		print(piece.location)
 		if colour == 'white':
 			king = self.board[self.Bking_location]
 			colour = 'black'
@@ -520,12 +514,8 @@ class ChessBoard():
 
 		direction = piece.id_direction(king.location)
 
-		print(direction)
-
 		inLineSquares = []
 		inLineSquares = piece.update_slide(piece.location, direction, inLineSquares, self)
-
-		print(inLineSquares)
 
 		for i in range(len(self.board)):
 			if self.board[i] != None:
@@ -535,45 +525,32 @@ class ChessBoard():
 							kingSquares.remove(j)
 
 				else:
-					print(self.board[i])
-					print(self.board[i].ADSquares)
 					if i in kingSquares:
 						kingSquares.remove(i)
 
 					if type(self.board[i]) == Pawn:
-						print('type is pawn')
 						if self.board[i].colour == 'white':
-							print('pawn is white')
-							print(i)
 							for g in range(2):
 								t = i - (16 * (g + 1))
 								if t in inLineSquares:
 									if self.move(self.board[i].location, t, colour, True) == True:
-										print('exit 1.1')
 										return False
 
 						if self.board[i].colour == 'black':
-							print('pawn is black')
-							print(i)
 							for g in range(2):
 								t = (i + (16 * (g + 1)))
 								if t in inLineSquares:
 									if self.move(self.board[i].location, t, colour, True) == True:
-										print('exit 1.2')
 										return False
 
 					for p in self.board[i].ADSquares:
 						if p in inLineSquares:
-							print(p)
 							if self.move(self.board[i].location, p, colour, True) == True:
-								print('exit 1')
 								return False
 
 		if len(kingSquares) == 0:
-			print('exit 2')
 			return True
 
-		print('exit 3')
 		return False
 
 	def final_update(self, colour, piece):
@@ -1375,6 +1352,7 @@ def game():
 	while valid == False:
 		menu = input('Input 1 to play against a player\nInput 2 to play against computer\n\n')
 		if menu == '1':
+			#start gui thread
 			guiThread = threading.Thread(target = startGui)
 			guiThread.start()
 			valid = True
@@ -1419,15 +1397,27 @@ def game():
 
 				except:
 					print('That is not an option')
+			#start gui thread
+			guiThread = threading.Thread(target = startGui)
+			guiThread.start()
 
 			player1 = human(colour1)
 			player2 = computer(colour2)
 			end = False
 			endColour = 'white'
 			while end != True:
-				end = player1.turn()
-				if end != True:
+				if colour1 == 'white':
+					end = player1.turn()
+
+				else:
 					end = player2.turn()
+
+				if end != True:
+					if colour1 == 'white':
+						end = player2.turn()
+
+					else:
+						end = player1.turn()
 
 				else:
 					endColour = 'black'
