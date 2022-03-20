@@ -10,6 +10,7 @@ from misc import *
 from score import *
 from PRNG import *
 from zorbristHash import *
+from evaluate import *
 
 #parent class for all piece types
 class Piece():
@@ -471,6 +472,8 @@ class ChessBoard():
 			if type(i) == Queen or type(i) == Bishop or type(i) == Rook:
 				self.slideLocations.append(self.board.index(i))
 
+		self.materialCount = countMaterial(self.board)
+
 		self.write_board()
 
 	def ADBoard_init(self):
@@ -616,10 +619,13 @@ class ChessBoard():
 				print('changing')
 				self.board[location2] = self.__choose_piece_change(colour, location2)
 				print('piece selected')
+				self.__updatePieceCount(self.board[location1])
 				self.board[location1] = None
 				self.board[location2].location = location2
 				self.board[location2].update_ADSquares(self)
-				self.update_locations(self.board[location2], location1)
+				if type(self.board[location2]) != Knight:
+					self.slideLocations.append(location2)
+				self.__updatePieceCountNew(self.board[location2])
 
 			else:
 				self.board[location2] = self.board[location1]
@@ -642,9 +648,6 @@ class ChessBoard():
 
 		for i in self.slideLocations:
 			self.board[i].block_update(location1, location2, self)
-			squares = []
-			for i in self.board[i].ADSquares:
-				squares.append(file_letter(i) + rank_num(i))
 
 		if colour == 'white':
 			if self.Bking_location in self.board[location2].ADSquares:
@@ -810,16 +813,17 @@ class ChessBoard():
 									if revert == True:
 										self.__revert(location1, location2, piece2)
 
-									if result == True:
+									if result == True and revert == False:
 										if piece2 != None:
 											self.halfmove_clock = 0
+											self.__updatePieceCount(piece2)
 
 										elif type(piece1) == Pawn:
 											self.halfmove_clock = 0
 
 										else:
 											self.halfmove_clock += 1
-
+ 
 										if colour == 'black':
 											self.fullmove_clock += 1
 
@@ -835,16 +839,17 @@ class ChessBoard():
 									else:
 										result = self.castle(piece1, location2)
 
-									if result == True:
+									if result == True and revert == False:
 										if piece2 != None:
 											self.halfmove_clock = 0
+											self.__updatePieceCount(piece2)
 
 										elif type(piece1) == Pawn:
 											self.halfmove_clock = 0
 
 										else:
 											self.halfmove_clock += 1
-											
+
 										if colour == 'black':
 											self.fullmove_clock += 1
 
@@ -858,16 +863,17 @@ class ChessBoard():
 								if revert == True:
 										self.__revert(location1, location2, piece2)
 
-								if result == True:
+								if result == True and revert == False:
 									if piece2 != None:
 										self.halfmove_clock = 0
+										self.__updatePieceCount(piece2)
 
 									elif type(piece1) == Pawn:
 										self.halfmove_clock = 0
 
 									else:
 										self.halfmove_clock += 1
-											
+
 									if colour == 'black':
 										self.fullmove_clock += 1
 
@@ -884,16 +890,17 @@ class ChessBoard():
 									if revert == True:
 										self.__revert(location1, location2, piece2)
 
-									if result == True:
+									if result == True and revert == False:
 										if piece2 != None:
 											self.halfmove_clock = 0
+											self.__updatePieceCount(piece2)
 
 										elif type(piece1) == Pawn:
 											self.halfmove_clock = 0
 
 										else:
 											self.halfmove_clock += 1
-											
+
 										if colour == 'black':
 											self.fullmove_clock += 1
 
@@ -909,22 +916,22 @@ class ChessBoard():
 									if revert == True:
 										self.__revert(location1, location2, piece2)
 
-									if result == True:
+									if result == True and revert == False:
 										if piece2 != None:
 											self.halfmove_clock = 0
+											self.__updatePieceCount(piece2)
 
 										elif type(piece1) == Pawn:
 											self.halfmove_clock = 0
 
 										else:
 											self.halfmove_clock += 1
-											
+
 										if colour == 'black':
 											self.fullmove_clock += 1
 
 										if self.halfmove_clock == 50:
-											result = 'end'
-										
+											result = 'end'										
 									return result
 
 							else:
@@ -933,16 +940,17 @@ class ChessBoard():
 									if revert == True:
 										self.__revert(location1, location2, piece2)
 
-									if result == True:
+									if result == True and revert == False:
 										if piece2 != None:
 											self.halfmove_clock = 0
+											self.__updatePieceCount(piece2)
 
 										elif type(piece1) == Pawn:
 											self.halfmove_clock = 0
 
 										else:
 											self.halfmove_clock += 1
-											
+
 										if colour == 'black':
 											self.fullmove_clock += 1
 
@@ -951,6 +959,14 @@ class ChessBoard():
 										
 									return result
 		return False
+
+	def __updatePieceCount(self, piece):
+		pieceChar = 'PNBRQKpnbrqk'
+		self.materialCount[pieceChar.find(piece.character)] -= 1
+
+	def __updatePieceCountNew(self, piece):
+		pieceChar = 'PNBRQKpnbrqk'
+		self.materialCount[pieceChar.find(piece.character)] += 1
 
 	def __selfTake(self, location1, location2):
 		if self.board[location1] != None:
@@ -1086,6 +1102,7 @@ class human(player):
 			print(location1)
 			print(location2)
 			moveResult = board1.move(location1, location2, self.colour, False)
+			print('reached')
 			if moveResult == False:
 				print('wrong move')
 				self.turn()
@@ -1106,6 +1123,7 @@ class human(player):
 				if self.colour == 'white':
 					colour = 'black'
 				print(FEN_code.notate(board1, colour))
+				print(board1.materialCount)
 
 		except:
 			f = open('move.txt','w')
@@ -1438,23 +1456,7 @@ def game():
 			print(hashedBoard)
 
 		elif menu == '5':
-			print(board1.move(16, 48, 'black', False))
-			#board1.move(0, 32, 'white', False)
-			board2 = board1.copyBoard()
-			board3 = copy.deepcopy(board1)
-			board3.ADBoard_init()
-			board1.print_board()
-			print(board1.board[0])
-			print(board1.board[0].ADSquares)
-			board2.print_board()
-			print(board2.board[0])
-			print(board2.board[0].ADSquares)
-			board3.print_board()
-			print(board3.board[0])
-			print(board3.board[0].ADSquares)
-			board3.move(96, 64, 'whtie', False)
-			board3.print_board()
-			print(board3.board[112].ADSquares)
+			pass
 
 		else:
 			print('that is not an option')
