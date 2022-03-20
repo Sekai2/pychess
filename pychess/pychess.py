@@ -1285,11 +1285,18 @@ class computer(player):
 		mobilityScore = mobilityEval()
 		score = (materialScore + mobilityScore) * multiplier
 
-	def materialEval(self):
-		pass
+	def totalEval(self, board):
+		return evaluate.material(board.materialCount)
 
-	def mobilityEval(self):
-		pass
+	def minimax(depth, node, maxing, max_depth):
+		if depth == max_depth:
+			return node.val
+
+		if maxing:
+			return max()
+
+
+
 
 #	def minimax(depth, node, maxing, values, max_depth):
 #		if depth == max_depth:
@@ -1303,7 +1310,9 @@ class computer(player):
 
 	def grow(self, node, depth, max_depth, colour):
 		if depth == max_depth:
-			return
+			node.val = self.totalEval(node.val)
+			if node.val != 0:
+				print(node.val)
 
 		else:
 			node.generate(colour)

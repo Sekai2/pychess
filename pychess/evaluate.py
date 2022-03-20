@@ -1,6 +1,3 @@
-import numba
-from numba import jit
-
 def countMaterial(board):
 		count = []
 		pieceChar = 'PNBRQKpnbrqk'
