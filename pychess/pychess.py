@@ -1258,8 +1258,11 @@ class computer(player):
 
 	def turn(self):
 		rootNode = node(board1)
-		self.grow(rootNode, 0, 2, self.colour)
-		#minimax(self, 1, rootNode, 0, self.max_depth, False, self.colour)
+		self.grow(rootNode, 0, self.max_depth, self.colour)
+		#nextNode = self.minimax(0, rootNode, True, self.max_depth)
+		#print('next node is:')
+		#print(nextNode)
+	#	print(nextNode.move)
 		nextNode = rootNode.children[random.randrange(len(rootNode.children))]
 		moveResult = board1.move(nextNode.move[0], nextNode.move[1], nextNode.colour, False)
 		if moveResult == 'checkmate':
@@ -1288,25 +1291,23 @@ class computer(player):
 	def totalEval(self, board):
 		return evaluate.material(board.materialCount)
 
-	def minimax(depth, node, maxing, max_depth):
-		if depth == max_depth:
-			return node.val
+	def minimax(self, depth, node, maxing, max_depth):
+		if depth == max_depth or node.val == 1000000000000000000:
+			return node
 
 		if maxing:
-			return max()
+			for i in node.children:
+				if type(node.val) != int:
+					node.val = -10000000000000000
+				node.val = max(node.val, self.minimax(depth +1, i, True, max_depth).val)
+			return node
 
-
-
-
-#	def minimax(depth, node, maxing, values, max_depth):
-#		if depth == max_depth:
-#			return values[node]
-#
-#		if maxing:
-#			return max(minimax(depth + 1, node * 2, False, values, max_depth),minimax(depth + 1, node * 2 + 1, False, values, max_depth))
-#
-#		else:
-#			return min(minimax(depth + 1, node * 2, True, values, max_depth),minimax(depth + 1, node * 2 + 1, True, values, max_depth))
+		else:
+			for i in node.children:
+				if type(node.val) != int:
+					node.val = 10000000000000000
+				node.val = min(node.val, self.minimax(depth +1, i, True, max_depth).val)
+			return node
 
 	def grow(self, node, depth, max_depth, colour):
 		if depth == max_depth:
@@ -1465,7 +1466,23 @@ def game():
 			print(hashedBoard)
 
 		elif menu == '5':
-			pass
+			player1 = computer('white')
+			a = node(None)
+			b = node(None)
+			c = node(None)
+			d = node(None)
+			e = node(None)
+			f = node(None)
+			c.children = [node(24),node(654),node(24),node(678)]
+			d.children = [node(84), node(74)]
+			e.children = [node(723), node(85), node(1644)]
+			f.children = [node(627),node(560),node(45), node(6264), node(69)]
+			a.children = [c,d]
+			b.children = [e,f]
+			root = node(None)
+			root.children = [a,b]
+			#player1.grow(root, 0, 2, 'white')
+			print(player1.minimax(0, root, True, 3).val)
 
 		else:
 			print('that is not an option')
