@@ -11,6 +11,7 @@ from score import *
 from PRNG import *
 from zorbristHash import *
 from evaluate import *
+from login import *
 
 #parent class for all piece types
 class Piece():
@@ -482,6 +483,9 @@ class ChessBoard():
 				i.update_ADSquares(self)
 
 	def update_locations(self, piece, location1):
+		if piece == None:
+			self.slideLocations.pop(self.slideLocations.index(location1))
+
 		if type(piece) == Bishop or type(piece) == Rook or type(piece) == Queen:
 			self.slideLocations.pop(self.slideLocations.index(location1))
 			self.slideLocations.append(piece.location)
@@ -1259,11 +1263,20 @@ class computer(player):
 	def turn(self):
 		rootNode = node(board1)
 		self.grow(rootNode, 0, self.max_depth, self.colour)
-		#nextNode = self.minimax(0, rootNode, True, self.max_depth)
-		#print('next node is:')
-		#print(nextNode)
-	#	print(nextNode.move)
-		nextNode = rootNode.children[random.randrange(len(rootNode.children))]
+		maxing = False
+		if self.colour == 'white':
+			maxing = True
+		optimalVal = self.minimax(0, rootNode, maxing, self.max_depth)
+		found = False
+		i = 0
+		while found == False:
+			if rootNode.children[i].val == optimalVal:
+				nextNode = rootNode.children[i]
+				found = True
+
+			else:
+				i += 1
+
 		moveResult = board1.move(nextNode.move[0], nextNode.move[1], nextNode.colour, False)
 		if moveResult == 'checkmate':
 			return True
@@ -1293,21 +1306,21 @@ class computer(player):
 
 	def minimax(self, depth, node, maxing, max_depth):
 		if depth == max_depth or node.val == 1000000000000000000:
-			return node
+			return node.val
 
 		if maxing:
 			for i in node.children:
 				if type(node.val) != int:
 					node.val = -10000000000000000
-				node.val = max(node.val, self.minimax(depth +1, i, True, max_depth).val)
-			return node
+				node.val = max(node.val, self.minimax(depth +1, i, True, max_depth))
+			return node.val
 
 		else:
 			for i in node.children:
 				if type(node.val) != int:
 					node.val = 10000000000000000
-				node.val = min(node.val, self.minimax(depth +1, i, True, max_depth).val)
-			return node
+				node.val = min(node.val, self.minimax(depth +1, i, True, max_depth))
+			return node.val
 
 	def grow(self, node, depth, max_depth, colour):
 		if depth == max_depth:
@@ -1482,7 +1495,7 @@ def game():
 			root = node(None)
 			root.children = [a,b]
 			#player1.grow(root, 0, 2, 'white')
-			print(player1.minimax(0, root, True, 3).val)
+			print(player1.minimax(0, root, True, 3))
 
 		else:
 			print('that is not an option')
