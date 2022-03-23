@@ -1149,6 +1149,7 @@ class node():
 		self.hash = None
 		self.descendants = 0
 		self.colour = ''#colour of turn to result in board stored in val
+		self.weight = None
 
 	def append(self, child, move, colour):
 		child.move = move
@@ -1262,7 +1263,7 @@ class computer(player):
 	def __init__(self, colour):
 		player.__init__(self)
 		self.colour = colour
-		self.max_depth = 2
+		self.max_depth = 3
 
 	def turn(self):
 		rootNode = node(board1)
@@ -1329,18 +1330,17 @@ class computer(player):
 	def grow(self, node, depth, max_depth, colour):
 		if depth == max_depth:
 			node.val = self.totalEval(node.val)
-			if node.val != 0:
-				print(node.val)
 
 		else:
-			node.generate(colour)
-			if colour == 'white':
-				colour = 'black'
+			if len(Node.children) == 0:
+				node.generate(colour)
+				if colour == 'white':
+					colour = 'black'
 
-			else:
-				colour = 'white'
-			for i in node.children:
-				self.grow(i, depth + 1, max_depth, colour)
+				else:
+					colour = 'white'
+				for i in node.children:
+					self.grow(i, depth + 1, max_depth, colour)
 
 	def test(self):
 		depth = input('Input the number of ply:\n')
@@ -1502,6 +1502,7 @@ def game():
 	chessClock = clock(3600)
 	while valid == False:
 		login.menu()
+		valid = True
 
 #player vs player
 def pvp():

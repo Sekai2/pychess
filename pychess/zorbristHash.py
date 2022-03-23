@@ -7,6 +7,9 @@ class hashTable():
 		self.random_val = PRNG.LCG(768, seed, 18446744073709551557, 13891176665706064842)
 		self.table = []
 		self.black_move = PRNG.LCG(1, 4829959, 18446744073709551557,13891176665706064842)
+		self.hashList = []
+		for i in range(18446744073709551557):
+			self.hashList.append(None)
 
 	def init_zobrist(self):
 		self.table = []
@@ -37,3 +40,5 @@ class hashTable():
 				p += 1
 
 		return h
+
+hashTable()
