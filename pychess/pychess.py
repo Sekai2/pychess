@@ -6,12 +6,16 @@ import random
 import subprocess
 import threading
 
+import tkinter as tk
+from tkinter import ttk
+from tkinter.messagebox import showinfo
+import sqlite3
+
 from misc import *
 from score import *
 from PRNG import *
 from zorbristHash import *
 from evaluate import *
-from login import *
 
 #parent class for all piece types
 class Piece():
@@ -1362,6 +1366,113 @@ class clock():
 		self.time = minutes + (seconds * 0.01)
 		return self.time
 
+#login system
+class login():
+	def menu():
+		global root
+		#login screen
+		root = tk.Tk()
+		window_width = 300
+		window_height = 200
+		screen_width = root.winfo_screenwidth()
+		screen_height = root.winfo_screenheight()
+		centre_x = screen_width // 2 - window_width // 2
+		centre_y = screen_height // 2 - window_height // 2
+		root.geometry(f"{window_width}x{window_height}+{centre_x}+{centre_y}")
+		root.resizable(False, False)
+		root.attributes("-topmost", 1)
+
+		username = tk.StringVar()
+		password = tk.StringVar()
+
+		signin = ttk.Frame(root)
+		signin.pack(padx = 10, pady = 10, fill = 'x', expand = True)
+
+		ttk.Label(signin, text = "Username:").pack(fill = "x", expand = True)
+		user_entry = ttk.Entry(signin, textvariable = username)
+		user_entry.pack(fill = "x", expand = True)
+		user_entry.focus()
+
+		ttk.Label(signin, text = "Password:").pack(fill = "x", expand = True)
+		pass_entry = ttk.Entry(signin, textvariable = password, show = "*")
+		pass_entry.pack(fill = "x", expand = True)
+
+		login_button = ttk.Button(root, text='login', command = lambda: login.hashCheck(str(username.get()), str(password.get())))
+		login_button.pack(ipadx = 5, ipady = 5, expand = True)
+
+		create_account_button = ttk.Button(root, text='Create Account', command = lambda: login.create(str(username.get()), str(password.get())))
+		create_account_button.pack(ipadx = 5, ipady = 5, expand = True)
+
+		root.mainloop()
+
+
+
+	#password hasher
+	def passwordHash(password):
+		numbers = PRNG.LCG(len(password), 257991014)
+		h = 0
+		for i in range(len(password)):
+			h = h ^ ord(password[i]) ^ numbers[i]
+		return h
+
+	def create(username, password):
+		wrongLabel = ttk.Label(text='Username already taken', foreground='red')
+		hashed = login.passwordHash(password)
+		conn = sqlite3.connect('chessplayers.db')
+		cursor = conn.cursor()
+		cursor.execute("""SELECT Username
+			FROM tblUsers
+			WHERE Username = '%s'""" % username)
+		check = cursor.fetchall()
+		if len(check) == 0:
+			cursor.execute("""INSERT INTO tblUsers (Username, Hash)
+				VALUES (?,?)""", (username, hashed))
+			conn.commit()
+
+		else:
+			wrongLabel.pack(fill = 'x', expand = True)
+
+	def hashCheck(username, password):
+		if password == '':
+			return
+		hashed = login.passwordHash(password)
+		conn = sqlite3.connect('chessplayers.db')
+		cursor = conn.cursor()
+		cursor.execute("""SELECT Username, Hash
+			FROM tblUsers
+			WHERE Username = '%s'""" % username)
+		details = cursor.fetchall()
+		if details == []:
+			return
+
+		elif details[0][1] == hashed:
+			global user
+			user = username
+			root.destroy()
+			login.selectMode()
+
+		else:
+			return
+
+	def selectMode():
+		global root
+		root = tk.Tk()
+		window_width = 300
+		window_height = 200
+		screen_width = root.winfo_screenwidth()
+		screen_height = root.winfo_screenheight()
+		centre_x = screen_width // 2 - window_width // 2
+		centre_y = screen_height // 2 - window_height // 2
+		root.geometry(f"{window_width}x{window_height}+{centre_x}+{centre_y}")
+		root.resizable(False, False)
+		root.attributes("-topmost", 1)
+
+		pvp_button = ttk.Button(root, text='MULTIPLAYER', command = lambda: pvp())
+		pvp_button.pack(ipadx = 5, ipady = 5, expand = True)
+
+		pvc_button = ttk.Button(root, text='SINGLE PLAYER', command = lambda: pvc())
+		pvc_button.pack(ipadx = 5, ipady = 5, expand = True)	
+
 def update_Data(clock):
 	f = open('UCode.txt','a')
 	f.write(clock.update())
@@ -1384,123 +1495,155 @@ def startGui():
 
 def game():
 	global board1
-	global user
 	board1 = ChessBoard('standard')
 	board1.ADBoard_init()
-	board1.print_board()
 	valid = False
 	global chessClock
 	chessClock = clock(3600)
 	while valid == False:
-		user = login.menu()
-		menu = input('Input 1 to play against a player\nInput 2 to play against computer\n\n')
-		if menu == '1':
-			#start gui thread
-			guiThread = threading.Thread(target = startGui)
-			guiThread.start()
-			valid = True
-			print('playing against human')
-			player1 = human('white')
-			player2 = human('black')
-			end = False
-			endColour = 'white'
-			while end != True:
-				end = player1.turn()
-				if end != True:
-					end = player2.turn()
+		login.menu()
 
-				else:
-					endColour = 'black'
-				#update_Data(chessClock)
-
-			endGame(endColour)
-
-		elif menu == '2':
-			valid = True
-			print('playing against computer')
-			loop = True
-			while loop == True:
-				colour = input('Select your side w/b:\n')
-				try:
-					print('testing')
-					if colour.lower() == 'w':
-						loop = False
-						print('Playing as white')
-						colour1 = 'white'
-						colour2 = 'black'
-
-					elif colour.lower() == 'b':
-						loop = False
-						print('Playing as black')
-						colour1 = 'black'
-						colour2 = 'white'
-
-					else:
-						print('That is not an option')
-
-				except:
-					print('That is not an option')
-			#start gui thread
-			guiThread = threading.Thread(target = startGui)
-			guiThread.start()
-
-			player1 = human(colour1)
-			player2 = computer(colour2)
-			end = False
-			endColour = 'white'
-			while end != True:
-				if colour1 == 'white':
-					end = player1.turn()
-
-				else:
-					end = player2.turn()
-
-				if end != True:
-					if colour1 == 'white':
-						end = player2.turn()
-
-					else:
-						end = player1.turn()
-
-				else:
-					endColour = 'black'
-
-			endGame(endColour)
-
-		elif menu == '3':
-			print('///////////computer test mode///////////')
-			cpu1 = computer('white')
-			print('1st move count: ')
-			print(cpu1.test())
-
-		elif menu == '4':
-			print('///////////zobrist test mode////////////')
-			hashBoard = hashTable()
-			hashBoard.init_zobrist()
-			hashedBoard = hashBoard.hash(board1, 'white')
-			print(hashedBoard)
-
-		elif menu == '5':
-			player1 = computer('white')
-			a = node(None)
-			b = node(None)
-			c = node(None)
-			d = node(None)
-			e = node(None)
-			f = node(None)
-			c.children = [node(24),node(654),node(24),node(678)]
-			d.children = [node(84), node(74)]
-			e.children = [node(723), node(85), node(1644)]
-			f.children = [node(627),node(560),node(45), node(6264), node(69)]
-			a.children = [c,d]
-			b.children = [e,f]
-			root = node(None)
-			root.children = [a,b]
-			#player1.grow(root, 0, 2, 'white')
-			print(player1.minimax(0, root, True, 3))
+#player vs player
+def pvp():
+	root.destroy()
+	#start gui thread
+	guiThread = threading.Thread(target = startGui)
+	guiThread.start()
+	valid = True
+	print('playing against human')
+	player1 = human('white')
+	player2 = human('black')
+	end = False
+	endColour = 'white'
+	while end != True:
+		end = player1.turn()
+		if end != True:
+			end = player2.turn()
 
 		else:
-			print('that is not an option')
+			endColour = 'black'
+		#update_Data(chessClock)
+
+	endGame(endColour)
+
+#player vs computer
+def pvc():
+	root.destroy()
+	global selectC
+	selectC = tk.Tk()
+	window_width = 300
+	window_height = 200
+	screen_width = selectC.winfo_screenwidth()
+	screen_height = selectC.winfo_screenheight()
+	centre_x = screen_width // 2 - window_width // 2
+	centre_y = screen_height // 2 - window_height // 2
+	selectC.geometry(f"{window_width}x{window_height}+{centre_x}+{centre_y}")
+	selectC.resizable(False, False)
+	selectC.attributes("-topmost", 1)
+
+	white = ttk.Button(selectC, text='WHITE', command = lambda: playing_as_white())
+	white.pack(ipadx = 5, ipady = 5, expand = True)
+
+	black = ttk.Button(selectC, text='BLACK', command = lambda: playing_as_black())
+	black.pack(ipadx = 5, ipady = 5, expand = True)
+
+def playing_as_white():
+	selectC.destroy()
+	guiThread = threading.Thread(target = startGui)
+	guiThread.start()
+
+	colour1 = 'white'
+	colour2 = 'black'
+
+	player1 = human(colour1)
+	player2 = computer(colour2)
+	end = False
+	endColour = 'white'
+	while end != True:
+		if colour1 == 'white':
+			end = player1.turn()
+
+		else:
+			end = player2.turn()
+
+		if end != True:
+			if colour1 == 'white':
+				end = player2.turn()
+
+			else:
+				end = player1.turn()
+
+		else:
+			endColour = 'black'
+
+	endGame(endColour)
+
+def playing_as_black():
+	selectC.destroy()
+	guiThread = threading.Thread(target = startGui)
+	guiThread.start()
+
+	colour1 = 'black'
+	colour2 = 'white'
+
+	player1 = human(colour1)
+	player2 = computer(colour2)
+	end = False
+	endColour = 'white'
+	while end != True:
+		if colour1 == 'white':
+			end = player1.turn()
+
+		else:
+			end = player2.turn()
+
+		if end != True:
+			if colour1 == 'white':
+				end = player2.turn()
+
+			else:
+				end = player1.turn()
+
+		else:
+			endColour = 'black'
+
+	endGame(endColour)
+
+def testMode():
+	if menu == '3':
+		print('///////////computer test mode///////////')
+		cpu1 = computer('white')
+		print('1st move count: ')
+		print(cpu1.test())
+
+	elif menu == '4':
+		print('///////////zobrist test mode////////////')
+		hashBoard = hashTable()
+		hashBoard.init_zobrist()
+		hashedBoard = hashBoard.hash(board1, 'white')
+		print(hashedBoard)
+
+	elif menu == '5':
+		player1 = computer('white')
+		a = node(None)
+		b = node(None)
+		c = node(None)
+		d = node(None)
+		e = node(None)
+		f = node(None)
+		c.children = [node(24),node(654),node(24),node(678)]
+		d.children = [node(84), node(74)]
+		e.children = [node(723), node(85), node(1644)]
+		f.children = [node(627),node(560),node(45), node(6264), node(69)]
+		a.children = [c,d]
+		b.children = [e,f]
+		root = node(None)
+		root.children = [a,b]
+		#player1.grow(root, 0, 2, 'white')
+		print(player1.minimax(0, root, True, 3))
+
+	else:
+		print('that is not an option')
 
 if __name__ == '__main__':
 	game()
