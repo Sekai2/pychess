@@ -4,12 +4,12 @@ class hashTable():
 	def __init__(self, seed = time.time_ns()):
 		self.constVal = [0,1,2,3,4,5,6,7,8,9,10,11]
 		self.pieceChar = 'PRBNQKprbnqk'
-		self.random_val = PRNG.LCG(768, seed, 18446744073709551557, 13891176665706064842)
+		self.random_val = PRNG.LCG(maxn = 768, seedn = seed, m = 268435399, a = 246049789)
 		self.table = []
-		self.black_move = PRNG.LCG(1, 4829959, 18446744073709551557,13891176665706064842)
-		self.hashList = []
-		for i in range(18446744073709551557):
-			self.hashList.append(None)
+		self.black_move = PRNG.LCG(maxn = 1, seedn = 4829959, m = 268435399, a = 246049789)
+		self.hashTbl = []
+		for i in range(268435399):
+			self.hashTbl.append(None)
 
 	def init_zobrist(self):
 		self.table = []
@@ -41,4 +41,19 @@ class hashTable():
 
 		return h
 
-hashTable()
+	def append(hashVal, content):
+		if self.hashTbl[hashVal] == None:
+			self.hashTbl[hashVal] = content
+
+		else:
+			replace = self.hashTbl[hashVal]
+			replace = (replace[0], replace[1], hashVal + 1)
+			self.append(hashVal + 1, content)
+
+	def find(content, hashVal = 0):
+		hashVal = self.hash(content)
+		if len(hashTbl[hashVal]) == 3:
+			return self.find(content, hashVal + 1)
+
+		else:
+			return hashTbl[hashVal]

@@ -1149,9 +1149,15 @@ class node():
 		self.hash = None
 		self.descendants = 0
 		self.colour = ''#colour of turn to result in board stored in val
-		self.weight = None
+		self.hashcolour = ''
 
 	def append(self, child, move, colour):
+		if colour == 'white':
+			self.hashcolour = 'black'
+
+		else:
+			colour = 'white'
+			
 		child.move = move
 		child.colour = colour
 		self.children.append(child)
@@ -1332,15 +1338,14 @@ class computer(player):
 			node.val = self.totalEval(node.val)
 
 		else:
-			if len(Node.children) == 0:
-				node.generate(colour)
-				if colour == 'white':
-					colour = 'black'
+			node.generate(colour)
+			if colour == 'white':
+				colour = 'black'
 
-				else:
-					colour = 'white'
-				for i in node.children:
-					self.grow(i, depth + 1, max_depth, colour)
+			else:
+				colour = 'white'
+			for i in node.children:
+				self.grow(i, depth + 1, max_depth, colour)
 
 	def test(self):
 		depth = input('Input the number of ply:\n')
@@ -1548,6 +1553,11 @@ def pvc():
 	black = ttk.Button(selectC, text='BLACK', command = lambda: playing_as_black())
 	black.pack(ipadx = 5, ipady = 5, expand = True)
 
+	global boardTable
+	boardTable = hashTable(seed = 68495)
+	boardTable.init_zobrist()
+
+
 def playing_as_white():
 	selectC.destroy()
 	guiThread = threading.Thread(target = startGui)
@@ -1610,7 +1620,7 @@ def playing_as_black():
 
 	endGame(endColour)
 
-def testMode():
+def testMode(menu):
 	if menu == '3':
 		print('///////////computer test mode///////////')
 		cpu1 = computer('white')
