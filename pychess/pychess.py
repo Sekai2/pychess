@@ -1384,6 +1384,7 @@ def startGui():
 
 def game():
 	global board1
+	global user
 	board1 = ChessBoard('standard')
 	board1.ADBoard_init()
 	board1.print_board()
@@ -1391,6 +1392,7 @@ def game():
 	global chessClock
 	chessClock = clock(3600)
 	while valid == False:
+		user = login.menu()
 		menu = input('Input 1 to play against a player\nInput 2 to play against computer\n\n')
 		if menu == '1':
 			#start gui thread
