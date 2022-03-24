@@ -1172,28 +1172,38 @@ class node():
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location + 16, colour, False) == True:
 								self.append(node(tempBoard), (i.location, i.location + 16), colour)
+								hashed = boardTable.hash(tempBoard, self.hashcolour)
+								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
 								#self.validate(self.val, i.location, i.location + 16, colour)
 
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location + 32, colour, False) == True:
 								self.append(node(tempBoard), (i.location, i.location + 32), colour)
+								hashed = boardTable.hash(tempBoard, self.hashcolour)
+								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
 								#self.validate(self.val, i.location, i.location + 32, colour)
 
 						elif colour == 'white':
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location - 16, colour, False) == True:
 								self.append(node(tempBoard), (i.location, i.location - 16), colour)
+								hashed = boardTable.hash(tempBoard, self.hashcolour)
+								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
 								#self.validate(self.val, i.location, i.location - 16, colour)
 
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location - 32, colour, False) == True:
 								self.append(node(tempBoard), (i.location, i.location - 32), colour)
+								hashed = boardTable.hash(tempBoard, self.hashcolour)
+								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
 								#self.validate(self.val, i.location, i.location - 32, colour)
 
 						for j in i.ADSquares:
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard), (i.location, j), colour)
+								hashed = boardTable.hash(tempBoard, self.hashcolour)
+								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
 								#self.validate(self.val, i.location, j, colour)
 
 					elif type(i) == King:
@@ -1201,6 +1211,8 @@ class node():
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard), (i.location, j), colour)
+								hashed = boardTable.hash(tempBoard, self.hashcolour)
+								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
 								#self.validate(self.val, i.location, j, colour)
 
 						if i.colour == 'white':
@@ -1209,12 +1221,16 @@ class node():
 									tempBoard = self.val.copyBoard()
 									if tempBoard.move(116, 114, colour, False) == True:
 										self.append(node(tempBoard), (116, 114), colour)
+										hashed = boardTable.hash(tempBoard, self.hashcolour)
+										boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
 								#		self.validate(self.val, 116, 114, colour)
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
 									if tempBoard.move(116, 118, colour, False) == True:
 										self.append(node(tempBoard), (116, 118), colour)
+										hashed = boardTable.hash(tempBoard, self.hashcolour)
+										boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
 								#		self.validate(self.val, 116, 118, colour)
 
 						if i.colour == 'black':
@@ -1223,12 +1239,16 @@ class node():
 									tempBoard = self.val.copyBoard()
 									if tempBoard.move(4, 2, colour, False) == True:
 										self.append(node(tempBoard), (4, 2), colour)
+										hashed = boardTable.hash(tempBoard, self.hashcolour)
+										boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
 								#		self.validate(self.val, 4, 2, colour)
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
 									if tempBoard.move(4, 7, colour, False) == True:
 										self.append(node(tempBoard), (4, 7), colour)
+										hashed = boardTable.hash(tempBoard, self.hashcolour)
+										boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
 								#		self.validate(self.val, 4, 7, colour)
 
 					else:
@@ -1236,6 +1256,8 @@ class node():
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard), (i.location, j), colour)
+								hashed = boardTable.hash(tempBoard, self.hashcolour)
+								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
 								#self.validate(self.val, i.location, j, colour)
 
 	def validate(self, board, a, b, colour):
@@ -1344,6 +1366,7 @@ class computer(player):
 
 			else:
 				colour = 'white'
+
 			for i in node.children:
 				self.grow(i, depth + 1, max_depth, colour)
 
@@ -1554,7 +1577,7 @@ def pvc():
 	black.pack(ipadx = 5, ipady = 5, expand = True)
 
 	global boardTable
-	boardTable = hashTable(seed = 68495)
+	boardTable = hashTable(seed = 855788754)
 	boardTable.init_zobrist()
 
 

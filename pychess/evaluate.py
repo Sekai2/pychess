@@ -43,3 +43,6 @@ class evaluate():
 		materialScore += evaluate.bishopPair(count)
 
 		return materialScore
+
+	def totalEval(board):
+		return evaluate.material(board.materialCount)
