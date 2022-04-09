@@ -676,16 +676,12 @@ class ChessBoard():
 						i.double_move = False
 				checkResult = self.__checkCheck(i)
 				if checkResult == colour:
-					print(' in check')
 					if checkResult != colour:
 						if self.__checkmateCheck(colour, i) == True:
-							print('checkmate')
 							return('checkmate')
 					if stop_rvt == True:
-						print('returning false')
 						return False
 					self.__revert(location1, location2, piece2)
-					print('returning false')
 					return False
 
 		#updating castling ability
@@ -1147,6 +1143,7 @@ class node():
 		self.children = []
 		self.move = (0,0)#move that results in board stored in val
 		self.hash = None
+		self.board = val
 		self.descendants = 0
 		self.colour = ''#colour of turn to result in board stored in val
 		self.hashcolour = ''
@@ -1164,6 +1161,10 @@ class node():
 
 	#child generation algorithm for node
 	def generate(self, colour):
+		if type(self.val) == int:
+			self.val = self.board
+
+		fen = FEN()
 		for i in self.val.board:
 			if i != None:
 				if i.colour == colour:
@@ -1172,38 +1173,33 @@ class node():
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location + 16, colour, False) == True:
 								self.append(node(tempBoard), (i.location, i.location + 16), colour)
-								hashed = boardTable.hash(tempBoard, self.hashcolour)
-								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
+								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location + 16, colour)
 
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location + 32, colour, False) == True:
 								self.append(node(tempBoard), (i.location, i.location + 32), colour)
-								hashed = boardTable.hash(tempBoard, self.hashcolour)
-								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
+								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location + 32, colour)
 
 						elif colour == 'white':
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location - 16, colour, False) == True:
 								self.append(node(tempBoard), (i.location, i.location - 16), colour)
-								hashed = boardTable.hash(tempBoard, self.hashcolour)
-								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
+								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location - 16, colour)
 
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, i.location - 32, colour, False) == True:
 								self.append(node(tempBoard), (i.location, i.location - 32), colour)
-								hashed = boardTable.hash(tempBoard, self.hashcolour)
-								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
+								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location - 32, colour)
 
 						for j in i.ADSquares:
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard), (i.location, j), colour)
-								hashed = boardTable.hash(tempBoard, self.hashcolour)
-								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
+								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
 
 					elif type(i) == King:
@@ -1211,8 +1207,7 @@ class node():
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard), (i.location, j), colour)
-								hashed = boardTable.hash(tempBoard, self.hashcolour)
-								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
+								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
 
 						if i.colour == 'white':
@@ -1221,16 +1216,14 @@ class node():
 									tempBoard = self.val.copyBoard()
 									if tempBoard.move(116, 114, colour, False) == True:
 										self.append(node(tempBoard), (116, 114), colour)
-										hashed = boardTable.hash(tempBoard, self.hashcolour)
-										boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
+										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 116, 114, colour)
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
 									if tempBoard.move(116, 118, colour, False) == True:
 										self.append(node(tempBoard), (116, 118), colour)
-										hashed = boardTable.hash(tempBoard, self.hashcolour)
-										boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
+										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 116, 118, colour)
 
 						if i.colour == 'black':
@@ -1239,16 +1232,14 @@ class node():
 									tempBoard = self.val.copyBoard()
 									if tempBoard.move(4, 2, colour, False) == True:
 										self.append(node(tempBoard), (4, 2), colour)
-										hashed = boardTable.hash(tempBoard, self.hashcolour)
-										boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
+										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 4, 2, colour)
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
 									if tempBoard.move(4, 7, colour, False) == True:
 										self.append(node(tempBoard), (4, 7), colour)
-										hashed = boardTable.hash(tempBoard, self.hashcolour)
-										boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
+										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 4, 7, colour)
 
 					else:
@@ -1256,8 +1247,7 @@ class node():
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard), (i.location, j), colour)
-								hashed = boardTable.hash(tempBoard, self.hashcolour)
-								boardTable.append(hashed, (tempBoard, evaluate.totalEval(tempBoard)))
+								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
 
 	def validate(self, board, a, b, colour):
@@ -1292,19 +1282,24 @@ class computer(player):
 		player.__init__(self)
 		self.colour = colour
 		self.max_depth = 3
+		self.rootNode = None
 
 	def turn(self):
-		rootNode = node(board1)
-		self.grow(rootNode, 0, self.max_depth, self.colour)
+		if self.rootNode == None:
+			self.rootNode = node(board1)
+
+		self.__updateRoot()
+		self.grow(self.rootNode, 0, self.max_depth, self.colour)
+
 		maxing = False
 		if self.colour == 'white':
 			maxing = True
-		optimalVal = self.minimax(0, rootNode, maxing, self.max_depth)
+		optimalVal = self.minimax(0, self.rootNode, maxing, self.max_depth)
 		found = False
 		i = 0
 		while found == False:
-			if rootNode.children[i].val == optimalVal:
-				nextNode = rootNode.children[i]
+			if self.rootNode.children[i].val == optimalVal:
+				nextNode = self.rootNode.children[i]
 				found = True
 
 			else:
@@ -1320,6 +1315,8 @@ class computer(player):
 		colour = 'white'
 		if self.colour == 'white':
 			colour = 'black'
+
+		self.rootNode = nextNode
 		print(FEN_code.notate(board1, colour))
 		board1.write_board()
 
@@ -1335,7 +1332,7 @@ class computer(player):
 		score = (materialScore + mobilityScore) * multiplier
 
 	def totalEval(self, board):
-		return evaluate.material(board.materialCount)
+		return evaluate.totalEval(board)
 
 	def minimax(self, depth, node, maxing, max_depth):
 		if depth == max_depth or node.val == 1000000000000000000:
@@ -1357,18 +1354,29 @@ class computer(player):
 
 	def grow(self, node, depth, max_depth, colour):
 		if depth == max_depth:
+			node.board = node.val
 			node.val = self.totalEval(node.val)
 
 		else:
-			node.generate(colour)
+			if len(node.children) == 0:
+				node.generate(colour)
+				print(depth)
+
 			if colour == 'white':
 				colour = 'black'
-
+				
 			else:
 				colour = 'white'
 
 			for i in node.children:
 				self.grow(i, depth + 1, max_depth, colour)
+
+	def __updateRoot(self):
+		fen = FEN()
+		targetFEN = fen.notate(board1, 'white')
+		for i in self.rootNode.children:
+			if targetFEN == fen.notate(i.board, 'white'):
+				self.rootNode = i
 
 	def test(self):
 		depth = input('Input the number of ply:\n')

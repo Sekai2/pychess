@@ -12,6 +12,7 @@ def id_square(coordinate):
 
 class gui():
 	def __init__(self):
+		self.dot = None
 		self.coordinate1 = None
 		self.coordinate2 = None
 		self.press_count = 0
@@ -55,6 +56,7 @@ class gui():
 		black_queen = pygame.image.load('assets/bq.png')#10
 		black_king = pygame.image.load('assets/bk.png')#11
 
+		self.square_selected = pygame.image.load('assets/SquareSelected.png')
 		self.piece_pick = pygame.image.load('assets/piecepickpng.png')
 
 		self.piece_list = [white_pawn, white_bishop, white_knight, white_rook, white_queen, white_king, black_pawn, black_bishop, black_knight, black_rook, black_queen, black_king]
@@ -73,6 +75,8 @@ class gui():
 					crashed = True
 
 			self.gameDisplay.blit(gui_board, (0,0))
+			if self.dot != None:
+				self.__SquareSelect(self.dot)
 			self.__board_update()
 			self.__updateBar()
 
@@ -93,6 +97,15 @@ class gui():
 
 			pygame.display.update()
 			clock.tick(60)
+
+	def __blit_alpha(self, source, location, opacity):
+		x = location[0]
+		y = location[0]
+		temp = pygame.Surface((source.get_width(), source.get_height())).convert()
+		temp.blit(self.gameDisplay, (-x, -y))
+		temp.blit(source, (0,0))
+		temp.set_alpha(opacity)
+		self.gameDisplay.blit(temp, location)
 
 	def __board_update(self):
 		f = open('board.txt', 'r')
@@ -132,6 +145,7 @@ class gui():
 		elif self.press_count == 2:
 			if pygame.mouse.get_pressed() == (True, False, False):
 				self.__getmouse()
+				self.dot = None
 				self.press_count = 3
 
 		elif self.press_count == 1:
@@ -145,12 +159,19 @@ class gui():
 	def __getmouse(self):
 		if pygame.mouse.get_pos()[0] < 632 and pygame.mouse.get_pos()[1] < 633:
 			if self.coordinate1 == None:
-				self.coordinate1 = pygame.mouse.get_pos()
+				mouse_pos = pygame.mouse.get_pos()
+				self.coordinate1 = mouse_pos
 				self.press_count = 1
+				self.dot = mouse_pos
 
 			else:
 				self.coordinate2 = pygame.mouse.get_pos()
 				self.__move(self.coordinate1, self.coordinate2)
+
+	def __SquareSelect(self, coordinate):
+		x = (coordinate[0] // 79) * 79
+		y = (coordinate[1] // 79) * 79
+		self.__blit_alpha(self.square_selected, (x,y), 128)
 
 	def __move(self, coordinate1, coordinate2):
 		index1 = id_square(coordinate1)
