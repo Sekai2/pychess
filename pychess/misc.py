@@ -25,3 +25,9 @@ def file_letter(i):
 def rank_num(i):
 	num = '87654321'
 	return str(int(num[board_rank(i)]))
+
+def leftRotate(n, d, bits = 32):
+	return(n << d)|(n >> (bits - d))
+
+def rightRotate(n, d, bits = 32):
+	return(n >> d)|(n << (bits - d)) & 0xFFFFFFFF

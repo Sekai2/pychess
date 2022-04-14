@@ -16,6 +16,7 @@ from score import *
 from PRNG import *
 from zorbristHash import *
 from evaluate import *
+from passwordHash import *
 
 #parent class for all piece types
 class Piece():
@@ -1445,11 +1446,12 @@ class login():
 
 	#password hasher
 	def passwordHash(password):
-		numbers = PRNG.LCG(len(password), 257991014)
-		h = 0
-		for i in range(len(password)):
-			h = h ^ ord(password[i]) ^ numbers[i]
-		return h
+		# numbers = PRNG.LCG(len(password), 257991014)
+		# h = 0
+		# for i in range(len(password)):
+		# 	h = h ^ ord(password[i]) ^ numbers[i]
+		# return h
+		return sha2(password)
 
 	def create(username, password):
 		wrongLabel = ttk.Label(text='Username already taken', foreground='red')
