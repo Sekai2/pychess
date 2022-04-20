@@ -525,6 +525,8 @@ class ChessBoard():
 		kingSquares = king.ADSquares
 
 		direction = piece.id_direction(king.location)
+		print(king.location)
+		print(piece.id_direction(king.location))
 
 		inLineSquares = []
 		inLineSquares = piece.update_slide(piece.location, direction, inLineSquares, self)
@@ -677,13 +679,21 @@ class ChessBoard():
 						i.double_move = False
 				checkResult = self.__checkCheck(i)
 				if checkResult == colour:
-					if checkResult != colour:
-						if self.__checkmateCheck(colour, i) == True:
-							return('checkmate')
 					if stop_rvt == True:
 						return False
 					self.__revert(location1, location2, piece2)
 					return False
+
+				elif checkResult != colour and checkResult != False:
+					print('openent in check')
+					if colour == 'white':
+						colour = 'black'
+
+					else:
+						colour = 'white'
+
+					if self.__checkmateCheck(colour, i) == True:
+						return('checkmate')
 
 		#updating castling ability
 		if piece1.colour == colour:
@@ -1148,6 +1158,7 @@ class node():
 		self.descendants = 0
 		self.colour = ''#colour of turn to result in board stored in val
 		self.hashcolour = ''
+		self.terminal = False
 
 	def append(self, child, move, colour):
 		if colour == 'white':
@@ -1172,33 +1183,42 @@ class node():
 					if type(i) == Pawn:
 						if colour == 'black':
 							tempBoard = self.val.copyBoard()
-							if tempBoard.move(i.location, i.location + 16, colour, False) == True:
+							result = tempBoard.move(i.location, i.location + 16, colour, False)
+							if result == True:
 								self.append(node(tempBoard), (i.location, i.location + 16), colour)
 								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location + 16, colour)
 
+							elif result == 'checkmate' or result == 'end':
+								self.append(node(tempBoard), (i.location, i.location + 16), colour)
+								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+
 							tempBoard = self.val.copyBoard()
-							if tempBoard.move(i.location, i.location + 32, colour, False) == True:
+							result = tempBoard.move(i.location, i.location + 32, colour, False)
+							if result == True:
 								self.append(node(tempBoard), (i.location, i.location + 32), colour)
 								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location + 32, colour)
 
 						elif colour == 'white':
 							tempBoard = self.val.copyBoard()
-							if tempBoard.move(i.location, i.location - 16, colour, False) == True:
+							result = tempBoard.move(i.location, i.location - 16, colour, False)
+							if result == True:
 								self.append(node(tempBoard), (i.location, i.location - 16), colour)
 								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location - 16, colour)
 
 							tempBoard = self.val.copyBoard()
-							if tempBoard.move(i.location, i.location - 32, colour, False) == True:
+							result = tempBoard.move(i.location, i.location - 32, colour, False)
+							if result == True:
 								self.append(node(tempBoard), (i.location, i.location - 32), colour)
 								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location - 32, colour)
 
 						for j in i.ADSquares:
 							tempBoard = self.val.copyBoard()
-							if tempBoard.move(i.location, j, colour, False) == True:
+							result = tempBoard.move(i.location, j, colour, False)
+							if result == True:
 								self.append(node(tempBoard), (i.location, j), colour)
 								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
@@ -1206,7 +1226,8 @@ class node():
 					elif type(i) == King:
 						for j in i.ADSquares:
 							tempBoard = self.val.copyBoard()
-							if tempBoard.move(i.location, j, colour, False) == True:
+							result = tempBoard.move(i.location, j, colour, False)
+							if result == True:
 								self.append(node(tempBoard), (i.location, j), colour)
 								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
@@ -1215,14 +1236,16 @@ class node():
 							if i.location == 116:
 								if i.Qcastling == True:
 									tempBoard = self.val.copyBoard()
-									if tempBoard.move(116, 114, colour, False) == True:
+									result = tempBoard.move(116, 114, colour, False)
+									if result == True:
 										self.append(node(tempBoard), (116, 114), colour)
 										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 116, 114, colour)
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
-									if tempBoard.move(116, 118, colour, False) == True:
+									result = tempBoard.move(116, 118, colour, False)
+									if result == True:
 										self.append(node(tempBoard), (116, 118), colour)
 										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 116, 118, colour)
@@ -1231,14 +1254,16 @@ class node():
 							if i.location == 4:
 								if i.Qcastling == True:
 									tempBoard = self.val.copyBoard()
-									if tempBoard.move(4, 2, colour, False) == True:
+									result = tempBoard.move(4, 2, colour, False)
+									if result == True:
 										self.append(node(tempBoard), (4, 2), colour)
 										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 4, 2, colour)
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
-									if tempBoard.move(4, 7, colour, False) == True:
+									result = tempBoard.move(4, 7, colour, False)
+									if result == True:
 										self.append(node(tempBoard), (4, 7), colour)
 										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 4, 7, colour)
@@ -1354,14 +1379,13 @@ class computer(player):
 			return node.val
 
 	def grow(self, node, depth, max_depth, colour):
-		if depth == max_depth:
+		if depth == max_depth or node.terminal == True:
 			node.board = node.val
 			node.val = self.totalEval(node.val)
 
 		else:
 			if len(node.children) == 0:
 				node.generate(colour)
-				print(depth)
 
 			if colour == 'white':
 				colour = 'black'
@@ -1455,7 +1479,7 @@ class login():
 
 	def create(username, password):
 		wrongLabel = ttk.Label(text='Username already taken', foreground='red')
-		hashed = login.passwordHash(password)
+		hashed = hex(login.passwordHash(password))
 		conn = sqlite3.connect('chessplayers.db')
 		cursor = conn.cursor()
 		cursor.execute("""SELECT Username
@@ -1473,7 +1497,7 @@ class login():
 	def hashCheck(username, password):
 		if password == '':
 			return
-		hashed = login.passwordHash(password)
+		hashed = hex(login.passwordHash(password))
 		conn = sqlite3.connect('chessplayers.db')
 		cursor = conn.cursor()
 		cursor.execute("""SELECT Username, Hash
