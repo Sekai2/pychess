@@ -56,8 +56,12 @@ class gui():
 		black_queen = pygame.image.load('assets/bq.png')#10
 		black_king = pygame.image.load('assets/bk.png')#11
 
+		#loading other assets
+
 		self.square_selected = pygame.image.load('assets/SquareSelected.png')
 		self.piece_pick = pygame.image.load('assets/piecepickpng.png')
+		self.checkmateW = pygame.image.load('assets/CheckmateW.png')
+		self.checkmateB = pygame.image.load('assets/CheckmateB.png')
 
 		self.piece_list = [white_pawn, white_bishop, white_knight, white_rook, white_queen, white_king, black_pawn, black_bishop, black_knight, black_rook, black_queen, black_king]
 
@@ -69,31 +73,49 @@ class gui():
 			self.gameDisplay.blit(white_pawn, (position))
 
 		crashed = False
+		checkmate = False
 		while not crashed:
 			for self.event in pygame.event.get():
 				if self.event.type == pygame.QUIT:
 					crashed = True
 
-			self.gameDisplay.blit(gui_board, (0,0))
-			if self.dot != None:
-				self.__SquareSelect(self.dot)
-			self.__board_update()
-			self.__updateBar()
+			if checkmate == False:
+				self.gameDisplay.blit(gui_board, (0,0))
+				if self.dot != None:
+					self.__SquareSelect(self.dot)
+				self.__board_update()
+				self.__updateBar()
 
-			self.__getmouse == 0
+				self.__getmouse == 0
 
-			f = open('move.txt','r')
-			content = f.read()
-			if content == 'listening':
-				self.__getSelection()
+				f = open('move.txt','r')
+				content = f.read()
+				f.close()
+				if content == 'listening':
+					self.__getSelection()
 
-			elif content == 'chooseWhite':
-				self.piece_pick_load('white')
-				self.__choose_square()
+				elif content == 'chooseWhite':
+					self.piece_pick_load('white')
+					self.__choose_square()
 
-			elif content == 'chooseBlack':
-				self.piece_pick_load('black')
-				self.__choose_square()
+				elif content == 'chooseBlack':
+					self.piece_pick_load('black')
+					self.__choose_square()
+
+				elif content == 'White':
+					self.__board_update()
+					self.gameDisplay.blit(self.checkmateW, (158,237))					
+					checkmate = True
+					time.sleep(5)
+					quit()
+
+				elif content == 'Black':
+					self.__board_update()
+					self.gameDisplay.blit(self.checkmateB, (158,237))
+					checkmate = True
+					time.sleep(5)
+					quit()
+
 
 			pygame.display.update()
 			clock.tick(60)

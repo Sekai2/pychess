@@ -1,4 +1,5 @@
 #miscellaneous functions
+from PRNG import *
 
 def negcheck(x):
 	if x < 0:
@@ -31,3 +32,26 @@ def leftRotate(n, d, bits = 32):
 
 def rightRotate(n, d, bits = 32):
 	return(n >> d)|(n << (bits - d)) & 0xFFFFFFFF
+
+def tupleMax(a, b):
+	if a[0] > b[0]:
+		return a
+
+	elif a[0] == b[0]:
+		rand_val = PRNG.LCG(m = 2)
+		if rand_val == 0:
+			return a
+
+		else:
+			return b
+
+	else:
+		return b
+
+def tupleMin(a, b):
+	print(a,b)
+	if a[0] < b[0]:
+		return a
+
+	else:
+		return b

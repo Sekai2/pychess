@@ -488,14 +488,16 @@ class ChessBoard():
 				i.update_ADSquares(self)
 
 	def update_locations(self, piece, location1):
-		if piece == None:
-			self.slideLocations.pop(self.slideLocations.index(location1))
+		if piece.location in self.slideLocations:
+			print('sliding piece  taken')
+			self.slideLocations.remove(piece.location)
+			print(self.slideLocations)
 
 		if type(piece) == Bishop or type(piece) == Rook or type(piece) == Queen:
 			self.slideLocations.pop(self.slideLocations.index(location1))
 			self.slideLocations.append(piece.location)
 
-		if type(piece) == King:
+		elif type(piece) == King:
 			if piece.colour == 'white':
 				self.Wking_location = piece.location
 
@@ -525,18 +527,42 @@ class ChessBoard():
 		kingSquares = king.ADSquares
 
 		direction = piece.id_direction(king.location)
-		print(king.location)
-		print(piece.id_direction(king.location))
 
 		inLineSquares = []
 		inLineSquares = piece.update_slide(piece.location, direction, inLineSquares, self)
+		temp = []
+		for i in inLineSquares:
+			if i not in temp:
+				temp.append(i)
+
+			else:
+				inLineSquares.remove(i)
 
 		for i in range(len(self.board)):
 			if self.board[i] != None:
 				if self.board[i].colour != king.colour:
-					for j in king.ADSquares:
-						if j in self.board[i].ADSquares:
-							kingSquares.remove(j)
+					if type(self.board[i]) != Pawn:
+						for j in king.ADSquares:
+							if j in self.board[i].ADSquares:
+								kingSquares.remove(j)
+
+					else:
+						for j in king.ADSquares:
+							if self.board[i].colour == 'white':
+								if board_rank(i) != 7:
+									if i + 15 in kingSquares:
+										kingSquares.remove(i + 15)
+
+									if i + 17 in kingSquares:
+										kingSquares.remove(i + 17)
+
+							elif self.board[i].colour == 'black':
+								if board_rank(i) != 0:
+									if i - 15 in kingSquares:
+										kingSquares.remove(i - 15)
+
+									if i - 17 in kingSquares:
+										kingSquares.remove(i - 17)
 
 				else:
 					if i in kingSquares:
@@ -544,21 +570,27 @@ class ChessBoard():
 
 					if type(self.board[i]) == Pawn:
 						if self.board[i].colour == 'white':
-							for g in range(2):
-								t = i - (16 * (g + 1))
-								if t in inLineSquares:
-									if self.move(self.board[i].location, t, colour, True) == True:
+							for t in self.board[i].ADSquares:
+								if t == piece.location and self.move(self.board[i].location, t, colour, True) == True:
 										return False
 
-						if self.board[i].colour == 'black':
-							for g in range(2):
-								t = (i + (16 * (g + 1)))
-								if t in inLineSquares:
-									if self.move(self.board[i].location, t, colour, True) == True:
+								else:
+									if (i - 16) in inLineSquares:
+										if self.move(self.board[i].location, i - 16, colour, True):
+											return False
+
+
+						elif self.board[i].colour == 'black':
+							for t in self.board[i].ADSquares:
+								if t == piece.location and self.move(self.board[i].location, t, colour, True) == True:
+										return False
+
+								else:
+									if (i + 16) in inLineSquares and self.move(self.board[i].location, i + 16, colour, True):
 										return False
 
 					for p in self.board[i].ADSquares:
-						if p in inLineSquares:
+						if p in inLineSquares or p == piece.location:
 							if self.move(self.board[i].location, p, colour, True) == True:
 								return False
 
@@ -590,8 +622,6 @@ class ChessBoard():
 			transform = f.read()
 			f.close()
 
-		print(transform)
-
 		if transform == 'N':
 			piece = Knight(colour, location)
 
@@ -611,10 +641,15 @@ class ChessBoard():
 		self.board[location1] = self.board[location2]
 		self.board[location1].location = location1
 		self.board[location2] = piece2
+
 		if self.board[location2] != None:
 			self.board[location2].location = location2
 		self.board[location1].update_ADSquares(self)
 		self.update_locations(self.board[location1], location2)
+
+		if type(piece2) == Bishop or type(piece2) == Rook or type(piece2) == Queen:
+			self.slideLocations.append(location2)
+
 		for i in self.slideLocations:
 			self.board[i].block_update(location2, location1, self)
 
@@ -636,6 +671,7 @@ class ChessBoard():
 				self.board[location2].update_ADSquares(self)
 				if type(self.board[location2]) != Knight:
 					self.slideLocations.append(location2)
+				self.update_locations(self.board[location2], location1)
 				self.__updatePieceCountNew(self.board[location2])
 
 			else:
@@ -686,11 +722,6 @@ class ChessBoard():
 
 				elif checkResult != colour and checkResult != False:
 					print('openent in check')
-					if colour == 'white':
-						colour = 'black'
-
-					else:
-						colour = 'white'
 
 					if self.__checkmateCheck(colour, i) == True:
 						return('checkmate')
@@ -1117,10 +1148,9 @@ class human(player):
 			print(location1)
 			print(location2)
 			moveResult = board1.move(location1, location2, self.colour, False)
-			print('reached')
 			if moveResult == False:
 				print('wrong move')
-				self.turn()
+				return self.turn()
 
 			elif moveResult == 'checkmate':
 				return True
@@ -1186,18 +1216,18 @@ class node():
 							result = tempBoard.move(i.location, i.location + 16, colour, False)
 							if result == True:
 								self.append(node(tempBoard), (i.location, i.location + 16), colour)
-								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location + 16, colour)
 
 							elif result == 'checkmate' or result == 'end':
 								self.append(node(tempBoard), (i.location, i.location + 16), colour)
-								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, i.location + 32, colour, False)
 							if result == True:
 								self.append(node(tempBoard), (i.location, i.location + 32), colour)
-								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location + 32, colour)
 
 						elif colour == 'white':
@@ -1205,14 +1235,14 @@ class node():
 							result = tempBoard.move(i.location, i.location - 16, colour, False)
 							if result == True:
 								self.append(node(tempBoard), (i.location, i.location - 16), colour)
-								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location - 16, colour)
 
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, i.location - 32, colour, False)
 							if result == True:
 								self.append(node(tempBoard), (i.location, i.location - 32), colour)
-								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location - 32, colour)
 
 						for j in i.ADSquares:
@@ -1220,7 +1250,7 @@ class node():
 							result = tempBoard.move(i.location, j, colour, False)
 							if result == True:
 								self.append(node(tempBoard), (i.location, j), colour)
-								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
 
 					elif type(i) == King:
@@ -1229,7 +1259,7 @@ class node():
 							result = tempBoard.move(i.location, j, colour, False)
 							if result == True:
 								self.append(node(tempBoard), (i.location, j), colour)
-								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
 
 						if i.colour == 'white':
@@ -1239,7 +1269,7 @@ class node():
 									result = tempBoard.move(116, 114, colour, False)
 									if result == True:
 										self.append(node(tempBoard), (116, 114), colour)
-										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 116, 114, colour)
 
 								if i.Kcastling == True:
@@ -1247,7 +1277,7 @@ class node():
 									result = tempBoard.move(116, 118, colour, False)
 									if result == True:
 										self.append(node(tempBoard), (116, 118), colour)
-										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 116, 118, colour)
 
 						if i.colour == 'black':
@@ -1257,7 +1287,7 @@ class node():
 									result = tempBoard.move(4, 2, colour, False)
 									if result == True:
 										self.append(node(tempBoard), (4, 2), colour)
-										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 4, 2, colour)
 
 								if i.Kcastling == True:
@@ -1265,7 +1295,7 @@ class node():
 									result = tempBoard.move(4, 7, colour, False)
 									if result == True:
 										self.append(node(tempBoard), (4, 7), colour)
-										boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 4, 7, colour)
 
 					else:
@@ -1273,7 +1303,7 @@ class node():
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(node(tempBoard), (i.location, j), colour)
-								boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
+								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
 
 	def validate(self, board, a, b, colour):
@@ -1321,17 +1351,14 @@ class computer(player):
 		if self.colour == 'white':
 			maxing = True
 		optimalVal = self.minimax(0, self.rootNode, maxing, self.max_depth)
-		found = False
-		i = 0
-		while found == False:
-			if self.rootNode.children[i].val == optimalVal:
-				nextNode = self.rootNode.children[i]
-				found = True
+		print('\n\nthe optimal val is:')
+		print(optimalVal)
+		optimalVal[1].val.print_board()
+		print(len(optimalVal[1].children))
 
-			else:
-				i += 1
-
+		nextNode = optimalVal[1]
 		moveResult = board1.move(nextNode.move[0], nextNode.move[1], nextNode.colour, False)
+
 		if moveResult == 'checkmate':
 			return True
 
@@ -1362,26 +1389,70 @@ class computer(player):
 
 	def minimax(self, depth, node, maxing, max_depth):
 		if depth == max_depth or node.val == 1000000000000000000:
-			return node.val
+			return (self.totalEval(node.val),node)
 
 		if maxing:
+			value = (-10000000000000000, None)
 			for i in node.children:
-				if type(node.val) != int:
-					node.val = -10000000000000000
-				node.val = max(node.val, self.minimax(depth +1, i, True, max_depth))
-			return node.val
+				# if type(node.val) != int:
+				# 	value = -10000000000000000
+				value = tupleMax(value, self.minimax(depth +1, i, False, max_depth))
+			if depth == 0:
+				return value
+
+			else:
+				return (value[0], node)
 
 		else:
+			value = (10000000000000000, None)
 			for i in node.children:
-				if type(node.val) != int:
-					node.val = 10000000000000000
-				node.val = min(node.val, self.minimax(depth +1, i, True, max_depth))
-			return node.val
+				# if type(node.val) != int:
+				# 	value = 10000000000000000
+				value = tupleMin(value, self.minimax(depth +1, i, True, max_depth))
+			if depth == 0:
+				return value
+
+			else:
+				return (value[0], node)
+
+	def minimax_AlphaBeta(self, depth, node, maxing, max_depth, alpha = (0, None), beta = (0, None)):
+		if depth == max_depth or len(node.children) == 0:
+			return (self.totalEval(node.val), node)
+
+		if maxing:
+			bestVal = (-10000000000000000, None)
+			for i in node.children:
+				value = self.minimax_AlphaBeta(depth +1, node, False, max_depth, alpha, beta)
+				bestVal = tupleMax(bestVal, value)
+				alpha = tupleMax(alpha, bestVal)
+				if beta[0] <= alpha[0]:
+					break
+
+			if depth == 0:
+				return bestVal
+
+			else:
+				return (bestVal[0], node)
+
+		else:
+			bestVal = (10000000000000000, None)
+			for i in node.children:
+				value = self.minimax_AlphaBeta(depth +1, node, True, max_depth, alpha, beta)
+				bestVal = tupleMin(bestVal, value)
+				beta = tupleMin(beta, bestVal)
+				if beta[0] <= alpha[0]:
+					break
+
+			if depth == 0:
+				return bestVal
+
+			else:
+				return (bestVal[0], node)
 
 	def grow(self, node, depth, max_depth, colour):
 		if depth == max_depth or node.terminal == True:
 			node.board = node.val
-			node.val = self.totalEval(node.val)
+
 
 		else:
 			if len(node.children) == 0:
@@ -1402,6 +1473,7 @@ class computer(player):
 		for i in self.rootNode.children:
 			if targetFEN == fen.notate(i.board, 'white'):
 				self.rootNode = i
+				return
 
 	def test(self):
 		depth = input('Input the number of ply:\n')
@@ -1541,6 +1613,7 @@ def update_Data(clock):
 	f.close()
 
 def endGame(colour):
+	board1.write_board()
 	print('Checkmate')
 	if colour == 'white':
 		colour = 'Black'
@@ -1548,9 +1621,12 @@ def endGame(colour):
 	else:
 		colour = 'White'
 
-	print(colour + ' wins!')
+	f = open('move.txt', 'w')
+	f.write(colour)
+	f.close()
 
-	quit()
+	print(colour + ' wins!')
+	return
 
 def startGui():
 	subprocess.run('python gui.pyw', shell = False)
