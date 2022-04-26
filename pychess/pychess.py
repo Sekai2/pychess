@@ -489,9 +489,7 @@ class ChessBoard():
 
 	def update_locations(self, piece, location1):
 		if piece.location in self.slideLocations:
-			print('sliding piece  taken')
 			self.slideLocations.remove(piece.location)
-			print(self.slideLocations)
 
 		if type(piece) == Bishop or type(piece) == Rook or type(piece) == Queen:
 			self.slideLocations.pop(self.slideLocations.index(location1))
@@ -544,7 +542,8 @@ class ChessBoard():
 					if type(self.board[i]) != Pawn:
 						for j in king.ADSquares:
 							if j in self.board[i].ADSquares:
-								kingSquares.remove(j)
+								if j in kingSquares:
+									kingSquares.remove(j)
 
 					else:
 						for j in king.ADSquares:
@@ -699,13 +698,11 @@ class ChessBoard():
 		if colour == 'white':
 			if self.Bking_location in self.board[location2].ADSquares:
 				if self.__checkmateCheck(colour, self.board[location2]) == True:
-					print('checkmate')
 					return('checkmate')
 
 		elif colour == 'black':
 			if self.Wking_location in self.board[location2].ADSquares:
 				if self.__checkmateCheck(colour, self.board[location2]) == True:
-					print('checkmate')
 					return('checkmate')
 
 		for i in self.board:
@@ -721,8 +718,6 @@ class ChessBoard():
 					return False
 
 				elif checkResult != colour and checkResult != False:
-					print('openent in check')
-
 					if self.__checkmateCheck(colour, i) == True:
 						return('checkmate')
 
@@ -1168,7 +1163,6 @@ class human(player):
 				if self.colour == 'white':
 					colour = 'black'
 				print(FEN_code.notate(board1, colour))
-				print(board1.materialCount)
 
 		except:
 			f = open('move.txt','w')
@@ -1195,7 +1189,7 @@ class node():
 			self.hashcolour = 'black'
 
 		else:
-			colour = 'white'
+			self.hashcolour = 'white'
 			
 		child.move = move
 		child.colour = colour
@@ -1350,11 +1344,8 @@ class computer(player):
 		maxing = False
 		if self.colour == 'white':
 			maxing = True
+
 		optimalVal = self.minimax(0, self.rootNode, maxing, self.max_depth)
-		print('\n\nthe optimal val is:')
-		print(optimalVal)
-		optimalVal[1].val.print_board()
-		print(len(optimalVal[1].children))
 
 		nextNode = optimalVal[1]
 		moveResult = board1.move(nextNode.move[0], nextNode.move[1], nextNode.colour, False)
@@ -1453,15 +1444,16 @@ class computer(player):
 		if depth == max_depth or node.terminal == True:
 			node.board = node.val
 
-
 		else:
 			if len(node.children) == 0:
 				node.generate(colour)
 
-			if colour == 'white':
-				colour = 'black'
-				
-			else:
+			if self.colour == 'white':
+
+				colour ='black'
+
+			elif self.colour == 'black':
+
 				colour = 'white'
 
 			for i in node.children:

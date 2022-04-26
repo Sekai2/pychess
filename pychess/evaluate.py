@@ -1,3 +1,5 @@
+from misc import *
+
 def countMaterial(board):
 		count = []
 		pieceChar = 'PNBRQKpnbrqk'
@@ -44,5 +46,115 @@ class evaluate():
 
 		return materialScore
 
+	def mobility(board):
+		#each square has a value of 1. Can be increased to change scaling
+		mobilityScore = 0
+		#defining centre squares as they are weighted more
+		#for speed some pawn structure features are also incorperated into mobility score
+		centre = [0x33, 0x34, 0x43, 0x44]
+		WpawnLocations = []
+		BpawnLocations = []
+		for i in board.board:
+			if i != None:
+				if i.colour == 'white':
+					for j in i.ADSquares:
+						if j in centre:
+							mobilityScore += 5
+
+						else:
+							mobilityScore += 1
+
+						if i.character == 'P':
+							WpawnLocations.append(i.location)
+							if board.board[j] != None:
+								if board.board[j].character == 'P':
+									mobilityScore += 2
+
+							if board.fullmove_clock < 3:
+								if i.location in [0x43,0x44]:
+									mobilityScore += 4
+							
+					if i.character == 'P':
+						if board_rank(i.location) == 7:
+							if board[i.location - 16] == None:
+								mobilityScore += 1
+
+							if board[i.location - 32] == None:
+								mobilityScore += 1
+
+				else:
+					for j in i.ADSquares:
+						if j in centre:
+							mobilityScore -= 5
+
+						else:
+							mobilityScore -= 1
+
+						if i.character == 'p':
+							BpawnLocations.append(i.location)
+							if board.board[j] != None:
+								if board.board[j].character == 'p':
+									mobilityScore -= 2
+
+							if board.fullmove_clock < 3:
+								if i.location in [0x33,0x34]:
+									mobilityScore -= 4
+								
+					if i.character == 'p':
+						if board_rank(i.location) == 0:
+							if board[i.location + 16] == None:
+								mobilityScore -= 1
+
+							if board[i.location + 32] == None:
+								mobilityScore -= 1
+
+		mobilityScore += evaluate.pawnStruct(WpawnLocations)
+		mobilityScore -= evaluate.pawnStruct(BpawnLocations)
+
+		return mobilityScore
+
+	#for pawn structure
+	def pawnStruct(locations):
+		isolatedFiles = 0
+		missingFiles = [0,1,2,3,4,5,6,7]
+		doubled_pawns = 0
+		chains = []
+		chainScore = 0
+		ranks = []
+		for i in range(30):
+			chains.append(0)
+
+		for i in locations:
+			if board_file(i) in missingFiles:
+				missingFiles.remove(board_file(i))
+
+			else:
+				doubled_pawns += 1
+
+			chains[(board_rank(i) - board_file(i)) + 7] += 1
+			chains[(board_rank(i) + board_file(i)) + 15] += 1
+
+			if board_rank(i) not in ranks:
+				ranks.append(i)
+
+		for i in missingFiles:
+			for j in missingFiles:
+				if i - j == 2:
+					if i - 1 in locations:
+						isolatedFiles += 1
+
+		for i in chains:
+			if i > 1:
+				chainScore += (i-1)
+
+		maxRank1 = max(ranks)
+		ranks.remove(maxRank1)
+		maxRank2 = max(ranks)
+		overextendScore = abs(maxRank2 - maxRank1)
+		if overextendScore > 2:
+			overextendScore = overextendScore * -15
+
+		return (isolatedFiles * -1) + (doubled_pawns * -20) + chainScore + overextendScore
+
 	def totalEval(board):
-		return evaluate.material(board.materialCount)
+		return evaluate.material(board.materialCount) + evaluate.mobility(board)
