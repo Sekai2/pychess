@@ -1,3 +1,5 @@
+#code for psudorandom number generator
+
 import time
 
 class PRNG():

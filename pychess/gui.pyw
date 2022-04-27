@@ -1,3 +1,5 @@
+#game gui code
+
 import pygame
 import time
 from misc import *
@@ -28,10 +30,7 @@ class gui():
 		icon = pygame.image.load('assets/logo.png')
 		pygame.display.set_icon(icon)
 
-		self.gameDisplay = pygame.display.set_mode((900,632))
-		self.gameDisplay.fill(self.grey)
-		#board (coordinate), (dimensions): (0,0),(631,632)
-		#board (coordinate), (dimensions): (631,632)
+		self.gameDisplay = pygame.display.set_mode((631,632))
 
 
 		pygame.display.set_caption('Tim Chess')
@@ -84,7 +83,6 @@ class gui():
 				if self.dot != None:
 					self.__SquareSelect(self.dot)
 				self.__board_update()
-				self.__updateBar()
 
 				self.__getmouse == 0
 
@@ -106,16 +104,15 @@ class gui():
 					self.__board_update()
 					self.gameDisplay.blit(self.checkmateW, (158,237))					
 					checkmate = True
-					time.sleep(5)
-					quit()
 
 				elif content == 'Black':
 					self.__board_update()
 					self.gameDisplay.blit(self.checkmateB, (158,237))
 					checkmate = True
-					time.sleep(5)
-					quit()
 
+			else:
+				time.sleep(5)
+				quit()
 
 			pygame.display.update()
 			clock.tick(60)
@@ -210,14 +207,6 @@ class gui():
 		f.close()
 		self.coordinate1 = None
 		self.coordinate2 = None
-
-	def __updateBar(self):
-		f = open('UCode.txt', 'r')
-		content = f.read()
-		f.close()
-		font = pygame.font.SysFont('Calibri', 50)
-		img = font.render('90:30', True, self.grey)
-		self.gameDisplay.blit(img, (631,20))
 
 	def __choose_square(self):
 		if self.press_count == 3:

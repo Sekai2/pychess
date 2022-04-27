@@ -1,10 +1,12 @@
+#main python code
+
 import time
 import math
 import copy
-import chess
 import random
 import subprocess
 import threading
+import json
 
 import tkinter as tk
 from tkinter import ttk
@@ -17,6 +19,7 @@ from PRNG import *
 from zorbristHash import *
 from evaluate import *
 from passwordHash import *
+from saving import *
 
 #parent class for all piece types
 class Piece():
@@ -1214,7 +1217,8 @@ class node():
 								#self.validate(self.val, i.location, i.location + 16, colour)
 
 							elif result == 'checkmate' or result == 'end':
-								self.append(node(tempBoard), (i.location, i.location + 16), colour)
+								self.append('terminal')
+								self.terminal = True
 								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 
 							tempBoard = self.val.copyBoard()
@@ -1300,21 +1304,6 @@ class node():
 								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
 
-	def validate(self, board, a, b, colour):
-		FEN_code = FEN()
-		chess_board = chess.Board(FEN_code.notate(board, colour))
-		#print(chess_board)
-		move = file_letter(a) + rank_num(a) + file_letter(b) + rank_num(b)
-		if chess.Move.from_uci(move) in chess_board.legal_moves == False:
-			f.open('bandBoard.txt', 'a')
-			f.write(FEN_code.notate(board, colour) + '\n' + move + '\n')
-			f.close()
-
-		else:
-			f = open('generated.txt','a')
-			f.write(FEN_code.notate(board, colour) + '\n' + move + '\n')
-			f.close()
-
 	#tree traversal algorithm
 	def count(self, node, ply, target_ply):
 		if ply == target_ply:
@@ -1331,7 +1320,7 @@ class computer(player):
 	def __init__(self, colour):
 		player.__init__(self)
 		self.colour = colour
-		self.max_depth = 3
+		self.max_depth = 2
 		self.rootNode = None
 
 	def turn(self):
@@ -1339,6 +1328,8 @@ class computer(player):
 			self.rootNode = node(board1)
 
 		self.__updateRoot()
+		print('rootNode is:')
+		self.rootNode.val.print_board()
 		self.grow(self.rootNode, 0, self.max_depth, self.colour)
 
 		maxing = False
@@ -1364,23 +1355,20 @@ class computer(player):
 		print(FEN_code.notate(board1, colour))
 		board1.write_board()
 
-	def evaluate(self):
-		if self.colour == 'white':
-			multiplier = 1
-
-		elif self.colour == 'black':
-			multiplier = -1
-
-		materialScore = materialEval()
-		mobilityScore = mobilityEval()
-		score = (materialScore + mobilityScore) * multiplier
-
 	def totalEval(self, board):
 		return evaluate.totalEval(board)
 
 	def minimax(self, depth, node, maxing, max_depth):
-		if depth == max_depth or node.val == 1000000000000000000:
-			return (self.totalEval(node.val),node)
+		if depth == max_depth or node.val == 'terminal':
+			if node.val != 'terminal':
+				return (self.totalEval(node.val),node)
+
+			elif node.val == 'terminal':
+				if node.colour == 'white':
+					return 100000000000000000000000
+
+				else:
+					return -100000000000000000000000
 
 		if maxing:
 			value = (-10000000000000000, None)
@@ -1462,10 +1450,16 @@ class computer(player):
 	def __updateRoot(self):
 		fen = FEN()
 		targetFEN = fen.notate(board1, 'white')
+		print('target FEN is :')
+		print(targetFEN)
 		for i in self.rootNode.children:
 			if targetFEN == fen.notate(i.board, 'white'):
+				print('found FEN is :')
+				print(fen.notate(i.board,'white'))
 				self.rootNode = i
 				return
+
+		self.rootNode = node(board1)
 
 	def test(self):
 		depth = input('Input the number of ply:\n')
@@ -1597,12 +1591,28 @@ class login():
 		pvp_button.pack(ipadx = 5, ipady = 5, expand = True)
 
 		pvc_button = ttk.Button(root, text='SINGLE PLAYER', command = lambda: pvc())
-		pvc_button.pack(ipadx = 5, ipady = 5, expand = True)	
+		pvc_button.pack(ipadx = 5, ipady = 5, expand = True)
 
-def update_Data(clock):
-	f = open('UCode.txt','a')
-	f.write(clock.update())
-	f.close()
+		load_button = ttk.Button(root, text='LOAD', command = lambda: login.load())
+		load_button.pack(ipadx = 5, ipady = 5, expand = True)
+
+	def load():
+		root.destroy()
+		selectC = tk.Tk()
+		listbox = tk.Listbox(selectC)
+		listbox.pack(side = tk.LEFT, fill = tk.BOTH)
+		scrollbar = tk.Scrollbar(selectC)
+		scrollbar.pack(side = tk.RIGHT, fill = tk.BOTH)
+		game_explorer = save()
+		game_list = game_explorer.listAll(user)
+
+		for i in game_list:
+			listbox.insert(tk.END, i)
+
+		listbox.config(yscrollcommand = scrollbar.set)
+		scrollbar.config(command = listbox.yview)
+
+
 
 def endGame(colour):
 	board1.write_board()
@@ -1630,6 +1640,9 @@ def game():
 	valid = False
 	global chessClock
 	chessClock = clock(3600)
+	f = open('move.txt', 'w')
+	f.write('')
+	f.close()
 	while valid == False:
 		login.menu()
 		valid = True

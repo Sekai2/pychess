@@ -1,3 +1,5 @@
+#code for evaluation function
+
 from misc import *
 
 def countMaterial(board):
@@ -59,7 +61,7 @@ class evaluate():
 				if i.colour == 'white':
 					for j in i.ADSquares:
 						if j in centre:
-							mobilityScore += 5
+							mobilityScore += 3
 
 						else:
 							mobilityScore += 1
@@ -70,9 +72,9 @@ class evaluate():
 								if board.board[j].character == 'P':
 									mobilityScore += 2
 
-							if board.fullmove_clock < 3:
+							if board.fullmove_clock < 10:
 								if i.location in [0x43,0x44]:
-									mobilityScore += 4
+									mobilityScore += 10
 							
 					if i.character == 'P':
 						if board_rank(i.location) == 7:
@@ -85,7 +87,7 @@ class evaluate():
 				else:
 					for j in i.ADSquares:
 						if j in centre:
-							mobilityScore -= 5
+							mobilityScore -= 3
 
 						else:
 							mobilityScore -= 1
@@ -96,9 +98,9 @@ class evaluate():
 								if board.board[j].character == 'p':
 									mobilityScore -= 2
 
-							if board.fullmove_clock < 3:
+							if board.fullmove_clock < 10:
 								if i.location in [0x33,0x34]:
-									mobilityScore -= 4
+									mobilityScore -= 10
 								
 					if i.character == 'p':
 						if board_rank(i.location) == 0:
@@ -145,14 +147,14 @@ class evaluate():
 
 		for i in chains:
 			if i > 1:
-				chainScore += (i-1)
+				chainScore += (i-1)*2
 
 		maxRank1 = max(ranks)
 		ranks.remove(maxRank1)
 		maxRank2 = max(ranks)
 		overextendScore = abs(maxRank2 - maxRank1)
 		if overextendScore > 2:
-			overextendScore = overextendScore * -15
+			overextendScore = overextendScore * -10
 
 		return (isolatedFiles * -1) + (doubled_pawns * -20) + chainScore + overextendScore
 
