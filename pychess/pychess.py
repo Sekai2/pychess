@@ -234,8 +234,8 @@ class King(Piece):
 		Piece.__init__(self, colour, location)
 		self.value = 10000000
 		self.character = 'K'
-		self.Qcastling = True
-		self.Kcastling = True
+		self.Qcastling = False
+		self.Kcastling = False
 		if self.colour == 'black':
 			self.character = self.character.lower()
 
@@ -316,68 +316,122 @@ class FEN():
 	def __initiate(self, FEN_code):
 		digits = '12345678'
 		board = []
+		copyFEN = FEN_code
+		populateBoard = True
+		count = 0
+		self.Wking_location = 116
+		self.Bking_location = 4
+		self.fullmove_clock = ''
+		self.halfmove_clock = ''
+		doublePawnLocation = ''
+
 		for i in FEN_code:
-			if i == '/' or i == ' ':
-				for i in range(8):
-					board.append(None)
-			elif i == 'r':
-				board.append(Rook('black', (len(board))))
-				self.quantity += 1
+			#print(i)
+			if populateBoard == True:
+				if i == ' ':
+					for i in range(8):
+						board.append(None)
+						populateBoard = False
+						castling = True
 
-			elif i == 'n':
-				board.append(Knight('black', (len(board))))
-				self.quantity += 1
+				elif i == '/':
+					for i in range(8):
+						board.append(None)
 
-			elif i == 'b':
-				board.append(Bishop('black', (len(board))))
-				self.quantity += 1
+				elif i == 'r':
+					board.append(Rook('black', (len(board))))
+					self.quantity += 1
 
-			elif i == 'q':
-				board.append(Queen('black', (len(board))))
-				self.quantity += 1
+				elif i == 'n':
+					board.append(Knight('black', (len(board))))
+					self.quantity += 1
 
-			elif i == 'k':
-				board.append(King('black', (len(board))))
-				self.quantity += 1
+				elif i == 'b':
+					board.append(Bishop('black', (len(board))))
+					self.quantity += 1
 
-			elif i == 'p':
-				board.append(Pawn('black', (len(board))))
-				self.quantity += 1
+				elif i == 'q':
+					board.append(Queen('black', (len(board))))
+					self.quantity += 1
 
-			elif i == 'R':
-				board.append(Rook('white', (len(board))))
-				self.quantity += 1
+				elif i == 'k':
+					board.append(King('black', (len(board))))
+					self.quantity += 1
+					self.Bking_location = len(board) - 1
 
-			elif i == 'N':
-				board.append(Knight('white', (len(board))))
-				self.quantity += 1
+				elif i == 'p':
+					board.append(Pawn('black', (len(board))))
+					self.quantity += 1
 
-			elif i == 'B':
-				board.append(Bishop('white', (len(board))))
-				self.quantity += 1
+				elif i == 'R':
+					board.append(Rook('white', (len(board))))
+					self.quantity += 1
 
-			elif i == 'Q':
-				board.append(Queen('white', (len(board))))
-				self.quantity += 1
+				elif i == 'N':
+					board.append(Knight('white', (len(board))))
+					self.quantity += 1
 
-			elif i == 'K':
-				board.append(King('white', (len(board))))
-				self.quantity += 1
+				elif i == 'B':
+					board.append(Bishop('white', (len(board))))
+					self.quantity += 1
 
-			elif i == 'Q':
-				board.append(Queen('white', (len(board))))
-				self.quantity += 1
+				elif i == 'Q':
+					board.append(Queen('white', (len(board))))
+					self.quantity += 1
 
-			elif i == 'P':
-				board.append(Pawn('white', (len(board))))
-				self.quantity += 1
+				elif i == 'K':
+					board.append(King('white', (len(board))))
+					self.quantity += 1
+					self.Wking_location = len(board) - 1
 
-			elif i in digits:
-				for j in range(int(i)):
-					board.append(None)
+				elif i == 'Q':
+					board.append(Queen('white', (len(board))))
+					self.quantity += 1
+
+				elif i == 'P':
+					board.append(Pawn('white', (len(board))))
+					self.quantity += 1
+
+				elif i in digits:
+					for j in range(int(i)):
+						board.append(None)
+
+			elif castling == True:
+				if i == 'K':
+					board[self.Wking_location].Kcastling = True
+
+				elif i == 'Q':
+					board[self.Wking_location].Qcastling = True
+
+				elif i == 'k':
+					board[self.Bking_location].Kcastling = True
+
+				elif i == 'q':
+					board[self.Bking_location].Qcastling = True
+
+				elif count == 1:
+					castling = False
+					doubleMove = True
+
+				elif i == ' ':
+					count += 1
+
+			elif doubleMove == True:
+				if len(doublePawnLocation) < 3:
+					if i != '-':
+						doublePawnLocation += i
+
+					elif i == '-':
+						doubleMove = False
+
+				elif i == ' ':
+					doubleMove = False
 
 			else:
-				return(board)
+				self.halfmove_clock = int(FEN_code[-3])
+				self.fullmove_clock = int(FEN_code[-1])
+			
+		return(board)
 
 	def notate(self, board, turn):
 		count = 0
@@ -474,7 +528,12 @@ class ChessBoard():
 			self.board = board
 
 		else:
-			self.board = FEN_code.load()
+			self.board = FEN_code.__initiate(board)
+
+		self.Wking_location = FEN_code.Wking_location
+		self.Bking_location = FEN_code.Bking_location
+		self.fullmove_clock = FEN_code.fullmove_clock
+		self.halfmove_clock = FEN_code.halfmove_clock
 
 		self.slideLocations = []
 		for i in self.board:
@@ -703,26 +762,44 @@ class ChessBoard():
 				if self.__checkmateCheck(colour, self.board[location2]) == True:
 					return('checkmate')
 
+			else:
+				for i in self.board:
+					if i != None:
+						if type(i) == Pawn:
+							if i.location != location2:
+								i.double_move = False
+						checkResult = self.__checkCheck(i)
+						if checkResult == colour:
+							if stop_rvt == True:
+								return False
+							self.__revert(location1, location2, piece2)
+							return False
+
+						elif checkResult != colour and checkResult != False:
+							if self.__checkmateCheck(colour, i) == True:
+								return('checkmate')
+
 		elif colour == 'black':
 			if self.Wking_location in self.board[location2].ADSquares:
 				if self.__checkmateCheck(colour, self.board[location2]) == True:
 					return('checkmate')
 
-		for i in self.board:
-			if i != None:
-				if type(i) == Pawn:
-					if i.location != location2:
-						i.double_move = False
-				checkResult = self.__checkCheck(i)
-				if checkResult == colour:
-					if stop_rvt == True:
-						return False
-					self.__revert(location1, location2, piece2)
-					return False
+			else:
+				for i in self.board:
+					if i != None:
+						if type(i) == Pawn:
+							if i.location != location2:
+								i.double_move = False
+						checkResult = self.__checkCheck(i)
+						if checkResult == colour:
+							if stop_rvt == True:
+								return False
+							self.__revert(location1, location2, piece2)
+							return False
 
-				elif checkResult != colour and checkResult != False:
-					if self.__checkmateCheck(colour, i) == True:
-						return('checkmate')
+						elif checkResult != colour and checkResult != False:
+							if self.__checkmateCheck(colour, i) == True:
+								return('checkmate')
 
 		#updating castling ability
 		if piece1.colour == colour:
@@ -756,7 +833,6 @@ class ChessBoard():
 					elif location2 == 7:
 						self.board[self.Bking_location].Kcastling = False
 
-		#self.__attack_check(piece1,piece2)
 		return True
 
 	def castle(self, piece, location2):
@@ -1070,35 +1146,6 @@ class ChessBoard():
 		f = open('board.txt', 'w')
 		f.write('')
 		f.close()
-
-
-	def __attack_check(self, piece1, piece2):
-		if piece2 != None:
-			score_change(piece1, piece2)
-
-		if type(piece) is Rook:
-			
-			location = piece.position
-			count = 0
-			direction = 1
-			straight = 16
-			while count != 4:
-				location = location + (direction * straight)
-				if self.board[location] == None:
-					self.board[location + 8] = colour
-
-				else:
-					count += 1
-					location = piece.position
-					if count == 1:
-						direction = -1
-
-					elif count == 2:
-						direction = 1
-						straight = 1
-
-					elif count == 3:
-						direction = -1
 
 	def copyBoard(self):
 		newBoard = []
