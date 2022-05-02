@@ -836,6 +836,12 @@ class ChessBoard():
 		return True
 
 	def castle(self, piece, location2):
+		for i in self.board:
+			if i != None:
+				if i.colour != piece.colour:
+					if piece.location in i.ADSquares:
+						return False
+
 		if piece.colour == 'white':
 			if location2 == 0x72:
 				if piece.Qcastling == True:
@@ -1384,6 +1390,7 @@ class computer(player):
 			maxing = True
 
 		optimalVal = self.minimax(0, self.rootNode, maxing, self.max_depth)
+		#optimalVal = self.minimax_AlphaBeta(0, self.rootNode, maxing, self.max_depth)
 
 		nextNode = optimalVal[1]
 		moveResult = board1.move(nextNode.move[0], nextNode.move[1], nextNode.colour, False)
@@ -1441,14 +1448,22 @@ class computer(player):
 			else:
 				return (value[0], node)
 
-	def minimax_AlphaBeta(self, depth, node, maxing, max_depth, alpha = (0, None), beta = (0, None)):
-		if depth == max_depth or len(node.children) == 0:
-			return (self.totalEval(node.val), node)
+	def minimax_AlphaBeta(self, depth, node, maxing, max_depth, alpha = (-1000000000000000000000, None), beta = (1000000000000000000000, None)):
+		if depth == max_depth or node.val == 'terminal':
+			if node.val != 'terminal':
+				return (self.totalEval(node.val), node)
+
+			elif node.val == 'terminal':
+				if node.colour == 'white':
+					return 100000000000000000000000
+
+				else:
+					return -100000000000000000000000
 
 		if maxing:
 			bestVal = (-10000000000000000, None)
 			for i in node.children:
-				value = self.minimax_AlphaBeta(depth +1, node, False, max_depth, alpha, beta)
+				value = self.minimax_AlphaBeta(depth +1, i, False, max_depth, alpha, beta)
 				bestVal = tupleMax(bestVal, value)
 				alpha = tupleMax(alpha, bestVal)
 				if beta[0] <= alpha[0]:
@@ -1463,7 +1478,7 @@ class computer(player):
 		else:
 			bestVal = (10000000000000000, None)
 			for i in node.children:
-				value = self.minimax_AlphaBeta(depth +1, node, True, max_depth, alpha, beta)
+				value = self.minimax_AlphaBeta(depth +1, i, True, max_depth, alpha, beta)
 				bestVal = tupleMin(bestVal, value)
 				beta = tupleMin(beta, bestVal)
 				if beta[0] <= alpha[0]:
