@@ -609,7 +609,7 @@ class ChessBoard():
 
 					else:
 						for j in king.ADSquares:
-							if self.board[i].colour == 'white':
+							if self.board[i].colour == 'white':	
 								if board_rank(i) != 7:
 									if i + 15 in kingSquares:
 										kingSquares.remove(i + 15)
@@ -1160,17 +1160,15 @@ class ChessBoard():
 		newChessBoard.board = newBoard
 		return newChessBoard
 #player class
-class player():
-	def __init__(self):
-		self.score = 0
-
+class Player():
+	def __init__(self, colour):
+		self.colour = colour
 	def turn():
 		pass
 
-class human(player):
+class Human(Player):
 	def __init__(self, colour):
-		player.__init__(self)
-		self.colour = colour
+		Player.__init__(self, colour)
 
 	def turn(self):
 		print(self.colour + '\'s turn')
@@ -1222,7 +1220,7 @@ class human(player):
 		board1.write_board()
 
 #node class for min max tree
-class node():
+class Node():
 	def __init__(self, val):
 		self.val = val
 		self.children = []
@@ -1259,7 +1257,7 @@ class node():
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, i.location + 16, colour, False)
 							if result == True:
-								self.append(node(tempBoard), (i.location, i.location + 16), colour)
+								self.append(Node(tempBoard), (i.location, i.location + 16), colour)
 								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location + 16, colour)
 
@@ -1271,7 +1269,7 @@ class node():
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, i.location + 32, colour, False)
 							if result == True:
-								self.append(node(tempBoard), (i.location, i.location + 32), colour)
+								self.append(Node(tempBoard), (i.location, i.location + 32), colour)
 								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location + 32, colour)
 
@@ -1279,14 +1277,14 @@ class node():
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, i.location - 16, colour, False)
 							if result == True:
-								self.append(node(tempBoard), (i.location, i.location - 16), colour)
+								self.append(Node(tempBoard), (i.location, i.location - 16), colour)
 								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location - 16, colour)
 
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, i.location - 32, colour, False)
 							if result == True:
-								self.append(node(tempBoard), (i.location, i.location - 32), colour)
+								self.append(Node(tempBoard), (i.location, i.location - 32), colour)
 								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, i.location - 32, colour)
 
@@ -1294,7 +1292,7 @@ class node():
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, j, colour, False)
 							if result == True:
-								self.append(node(tempBoard), (i.location, j), colour)
+								self.append(Node(tempBoard), (i.location, j), colour)
 								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
 
@@ -1303,7 +1301,7 @@ class node():
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, j, colour, False)
 							if result == True:
-								self.append(node(tempBoard), (i.location, j), colour)
+								self.append(Node(tempBoard), (i.location, j), colour)
 								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
 
@@ -1313,7 +1311,7 @@ class node():
 									tempBoard = self.val.copyBoard()
 									result = tempBoard.move(116, 114, colour, False)
 									if result == True:
-										self.append(node(tempBoard), (116, 114), colour)
+										self.append(Node(tempBoard), (116, 114), colour)
 										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 116, 114, colour)
 
@@ -1321,7 +1319,7 @@ class node():
 									tempBoard = self.val.copyBoard()
 									result = tempBoard.move(116, 118, colour, False)
 									if result == True:
-										self.append(node(tempBoard), (116, 118), colour)
+										self.append(Node(tempBoard), (116, 118), colour)
 										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 116, 118, colour)
 
@@ -1331,7 +1329,7 @@ class node():
 									tempBoard = self.val.copyBoard()
 									result = tempBoard.move(4, 2, colour, False)
 									if result == True:
-										self.append(node(tempBoard), (4, 2), colour)
+										self.append(Node(tempBoard), (4, 2), colour)
 										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 4, 2, colour)
 
@@ -1339,7 +1337,7 @@ class node():
 									tempBoard = self.val.copyBoard()
 									result = tempBoard.move(4, 7, colour, False)
 									if result == True:
-										self.append(node(tempBoard), (4, 7), colour)
+										self.append(Node(tempBoard), (4, 7), colour)
 										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#		self.validate(self.val, 4, 7, colour)
 
@@ -1347,7 +1345,7 @@ class node():
 						for j in i.ADSquares:
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
-								self.append(node(tempBoard), (i.location, j), colour)
+								self.append(Node(tempBoard), (i.location, j), colour)
 								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 								#self.validate(self.val, i.location, j, colour)
 
@@ -1363,16 +1361,15 @@ class node():
 		return self.descendants
 
 #chess ai class
-class computer(player):
+class Computer(Player):
 	def __init__(self, colour):
-		player.__init__(self)
-		self.colour = colour
+		Player.__init__(self, colour)
 		self.max_depth = 2
 		self.rootNode = None
 
 	def turn(self):
 		if self.rootNode == None:
-			self.rootNode = node(board1)
+			self.rootNode = Node(board1)
 
 		self.__updateRoot()
 		print('rootNode is:')
@@ -1506,11 +1503,11 @@ class computer(player):
 				self.rootNode = i
 				return
 
-		self.rootNode = node(board1)
+		self.rootNode = Node(board1)
 
 	def test(self):
 		depth = input('Input the number of ply:\n')
-		root = node(board1)
+		root = Node(board1)
 		start_time = time.time()
 		self.grow(root, 0, int(depth), 'white')
 		end_time = time.time()
@@ -1702,8 +1699,8 @@ def pvp():
 	guiThread.start()
 	valid = True
 	print('playing against human')
-	player1 = human('white')
-	player2 = human('black')
+	player1 = Human('white')
+	player2 = Human('black')
 	end = False
 	endColour = 'white'
 	while end != True:
@@ -1751,8 +1748,8 @@ def playing_as_white():
 	colour1 = 'white'
 	colour2 = 'black'
 
-	player1 = human(colour1)
-	player2 = computer(colour2)
+	player1 = Human(colour1)
+	player2 = Computer(colour2)
 	end = False
 	endColour = 'white'
 	while end != True:
@@ -1782,8 +1779,8 @@ def playing_as_black():
 	colour1 = 'black'
 	colour2 = 'white'
 
-	player1 = human(colour1)
-	player2 = computer(colour2)
+	player1 = Human(colour1)
+	player2 = Computer(colour2)
 	end = False
 	endColour = 'white'
 	while end != True:
@@ -1808,7 +1805,7 @@ def playing_as_black():
 def testMode(menu):
 	if menu == '3':
 		print('///////////computer test mode///////////')
-		cpu1 = computer('white')
+		cpu1 = Computer('white')
 		print('1st move count: ')
 		print(cpu1.test())
 
@@ -1820,20 +1817,20 @@ def testMode(menu):
 		print(hashedBoard)
 
 	elif menu == '5':
-		player1 = computer('white')
-		a = node(None)
-		b = node(None)
-		c = node(None)
-		d = node(None)
-		e = node(None)
-		f = node(None)
-		c.children = [node(24),node(654),node(24),node(678)]
-		d.children = [node(84), node(74)]
-		e.children = [node(723), node(85), node(1644)]
-		f.children = [node(627),node(560),node(45), node(6264), node(69)]
+		player1 = Computer('white')
+		a = Node(None)
+		b = Node(None)
+		c = Node(None)
+		d = Node(None)
+		e = Node(None)
+		f = Node(None)
+		c.children = [Node(24),Node(654),Node(24),Node(678)]
+		d.children = [Node(84), Node(74)]
+		e.children = [Node(723), Node(85), Node(1644)]
+		f.children = [Node(627),Node(560),Node(45), Node(6264), Node(69)]
 		a.children = [c,d]
 		b.children = [e,f]
-		root = node(None)
+		root = Node(None)
 		root.children = [a,b]
 		#player1.grow(root, 0, 2, 'white')
 		print(player1.minimax(0, root, True, 3))
