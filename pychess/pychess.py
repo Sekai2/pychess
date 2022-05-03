@@ -27,7 +27,6 @@ class Piece():
 		self.colour = colour
 		self.location = location
 		self.ADSquares = []
-		self.hashval = 0
 
 	def clean(self):
 		#deletes repeats from ADSquares
@@ -660,9 +659,6 @@ class ChessBoard():
 
 		return False
 
-	def final_update(self, colour, piece):
-		pass
-
 	def __choose_piece_change(self, colour, location):
 		f = open('move.txt', 'w')
 		if colour == 'white':
@@ -755,7 +751,11 @@ class ChessBoard():
 			#updating king index
 
 		for i in self.slideLocations:
-			self.board[i].block_update(location1, location2, self)
+			if i != None:
+				self.board[i].block_update(location1, location2, self)
+
+			else:
+				self.slideLocations.remove(i)
 
 		if colour == 'white':
 			if self.Bking_location in self.board[location2].ADSquares:
@@ -1232,7 +1232,6 @@ class Node():
 		self.children = []
 		self.move = (0,0)#move that results in board stored in val
 		self.hash = None
-		self.board = val
 		self.descendants = 0
 		self.colour = ''#colour of turn to result in board stored in val
 		self.hashcolour = ''
@@ -1251,10 +1250,6 @@ class Node():
 
 	#child generation algorithm for node
 	def generate(self, colour):
-		if type(self.val) == int:
-			self.val = self.board
-
-		fen = FEN()
 		for i in self.val.board:
 			if i != None:
 				if i.colour == colour:
@@ -1319,7 +1314,6 @@ class Node():
 									if result == True:
 										self.append(Node(tempBoard), (116, 114), colour)
 										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
-								#		self.validate(self.val, 116, 114, colour)
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
@@ -1327,7 +1321,6 @@ class Node():
 									if result == True:
 										self.append(Node(tempBoard), (116, 118), colour)
 										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
-								#		self.validate(self.val, 116, 118, colour)
 
 						if i.colour == 'black':
 							if i.location == 4:
@@ -1337,7 +1330,6 @@ class Node():
 									if result == True:
 										self.append(Node(tempBoard), (4, 2), colour)
 										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
-								#		self.validate(self.val, 4, 2, colour)
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
@@ -1345,7 +1337,6 @@ class Node():
 									if result == True:
 										self.append(Node(tempBoard), (4, 7), colour)
 										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
-								#		self.validate(self.val, 4, 7, colour)
 
 					else:
 						for j in i.ADSquares:
@@ -1353,7 +1344,6 @@ class Node():
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(Node(tempBoard), (i.location, j), colour)
 								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
-								#self.validate(self.val, i.location, j, colour)
 
 	#tree traversal algorithm
 	def count(self, node, ply, target_ply):
@@ -1406,13 +1396,10 @@ class Computer(Player):
 		print(FEN_code.notate(board1, colour))
 		board1.write_board()
 
-	def totalEval(self, board):
-		return evaluate.totalEval(board)
-
 	def minimax(self, depth, node, maxing, max_depth):
 		if depth == max_depth or node.val == 'terminal':
 			if node.val != 'terminal':
-				return (self.totalEval(node.val),node)
+				return (evaluate.totalEval(node.val),node)
 
 			elif node.val == 'terminal':
 				if node.colour == 'white':
@@ -1448,7 +1435,7 @@ class Computer(Player):
 	def minimax_AlphaBeta(self, depth, node, maxing, max_depth, alpha = (-1000000000000000000000, None), beta = (1000000000000000000000, None)):
 		if depth == max_depth or node.val == 'terminal':
 			if node.val != 'terminal':
-				return (self.totalEval(node.val), node)
+				return (evaluate.totalEval(node.val), node)
 
 			elif node.val == 'terminal':
 				if node.colour == 'white':
@@ -1489,7 +1476,7 @@ class Computer(Player):
 
 	def grow(self, node, depth, max_depth, colour):
 		if depth == max_depth or node.terminal == True:
-			node.board = node.val
+			return
 
 		else:
 			if len(node.children) == 0:
@@ -1512,9 +1499,9 @@ class Computer(Player):
 		print('target FEN is :')
 		print(targetFEN)
 		for i in self.rootNode.children:
-			if targetFEN == fen.notate(i.board, 'white'):
+			if targetFEN == fen.notate(i.val, 'white'):
 				print('found FEN is :')
-				print(fen.notate(i.board,'white'))
+				print(fen.notate(i.val,'white'))
 				self.rootNode = i
 				return
 

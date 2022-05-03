@@ -74,7 +74,7 @@ class evaluate():
 
 							if board.fullmove_clock < 10:
 								if i.location in [0x43,0x44]:
-									mobilityScore += 10
+									mobilityScore += 8
 							
 					if i.character == 'P':
 						if board_rank(i.location) == 7:
@@ -100,7 +100,7 @@ class evaluate():
 
 							if board.fullmove_clock < 10:
 								if i.location in [0x33,0x34]:
-									mobilityScore -= 10
+									mobilityScore -= 8
 								
 					if i.character == 'p':
 						if board_rank(i.location) == 0:
