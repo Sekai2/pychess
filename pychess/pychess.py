@@ -35,9 +35,8 @@ class Piece():
 			 	for j in range(self.ADSquares.count(i)-1):
 			 		self.ADSquares.remove(i)
 
+	#updates ADSqures for a single line/direction
 	def update_slide(self, location, direction, squares, chessBoard):
-
-		#updates ADSqures for a single line/direction
 		location = location + direction
 		if chessBoard.offBoardCheck(location) == True:
 			if chessBoard.board[location] == None:
@@ -49,8 +48,8 @@ class Piece():
 
 		return(squares)
 
+	#identifies the between piece and a location, used to identify direction that needs to be updated for a sliding piece
 	def id_direction(self, moved):
-		#identifies the between piece and a location, used to identify direction that needs to be updated for a sliding piece
 		if moved in self.ADSquares:
 			direction = moved - self.location
 			multiplier = direction // abs(direction)
@@ -71,8 +70,8 @@ class Piece():
 
 			return direction
 
+	#updates ADSquares for sliding pieces when blocking pieces are moved or pieces are moved into slide line
 	def block_update(self, location1, location2, chessBoard):
-		#updates ADSquares for sliding pieces when blocking pieces are moved or pieces are moved into slide line
 		if location2 in self.ADSquares:
 			self.update_ADSquares(chessBoard)
 

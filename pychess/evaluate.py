@@ -2,6 +2,7 @@
 
 from misc import *
 
+#function for counting the amount of material on the board
 def countMaterial(board):
 		count = []
 		pieceChar = 'PNBRQKpnbrqk'

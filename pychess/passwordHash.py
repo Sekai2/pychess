@@ -1,8 +1,8 @@
 import time
 from misc import *
 from PRNG import *
-#password hash
 
+#password hash
 def sha2(password):
 	#first 32 bits of the fractional parts of the square roots of the first 8 primes
 	h0 = 0x6a09e667
