@@ -142,7 +142,7 @@ class evaluate():
 		for i in missingFiles:
 			for j in missingFiles:
 				if i - j == 2:
-					if i - 1 in locations:
+					if i - 1 not in missingFiles:
 						isolatedFiles += 1
 
 		for i in chains:

@@ -35,6 +35,7 @@ class hashTable():
 				p += 1
 		return h
 
+	#adding items to the lookup table
 	def append(self, board, colour, score, FEN, hashVal = None):
 		content = [board, score, FEN]
 		if hashVal == None:
@@ -61,55 +62,3 @@ class hashTable():
 
 			else:
 				return self.hashTbl[hashVal]
-
-if __name__ == '__main__':
-	class piece():
-		def __init__(self, character):
-			self.character = character
-
-
-	class board():
-		def __init__(self):
-			self.board = []
-			for i in range(128):
-				self.board.append(None)
-			self.board[0] = piece('R')
-			self.board[1] = piece('N')
-			self.board[2] = piece('B')
-			self.board[3] = piece('Q')
-			self.board[4] = piece('K')
-			self.board[5] = piece('B')
-			self.board[6] = piece('N')
-			self.board[7] = piece('R')
-			self.board[16] = piece('P')
-			self.board[17] = piece('P')
-			self.board[18] = piece('P')
-			self.board[19] = piece('P')
-			self.board[20] = piece('P')
-			self.board[21] = piece('P')
-			self.board[22] = piece('P')
-			self.board[55] = piece('P')
-			self.board[96] = piece('p')
-			self.board[97] = piece('p')
-			self.board[98] = piece('p')
-			self.board[99] = piece('p')
-			self.board[100] = piece('p')
-			self.board[101] = piece('p')
-			self.board[102] = piece('p')
-			self.board[103] = piece('p')
-			self.board[112] = piece('r')
-			self.board[113] = piece('n')
-			self.board[114] = piece('b')
-			self.board[115] = piece('q')
-			self.board[116] = piece('k')
-			self.board[117] = piece('b')
-			self.board[118] = piece('n')
-			self.board[119] = piece('r')
-
-	board1 = board()
-	hashtbl = hashTable()
-	hashtbl.init_zobrist()
-	hashtbl.append(board1, 'white', '2')
-	hashtbl.append(board1, 'white', '2')
-	
-	print(hashtbl)

@@ -1,37 +1,10 @@
 import time
 from misc import *
-
-class PRNG():
-	def __init__(self, seed = int(time.time_ns())):
-		self.seed1 = seed
-		self.seedn = seed
-
-	#Linear Conguential Generator
-	#default is random 31 bit number
-	def LCG(maxn = 1, seedn = int(time.time_ns()), m = 2147483647, a = 16807, c = 1, n = 0, result = []):
-		if n == maxn:
-			return result
-
-		elif n == 0:
-			result = []
-		randnum = (a * seedn + c) % m
-		result.append(randnum)
-		return(PRNG.LCG(maxn, randnum, m, a, c, n + 1, result))
-
-	def LCGbetween(lower1, upper1, maxn = 1, seedn = int(time.time_ns())):
-		rand_range = upper1 - lower1
-		a = (upper1 + lower1)//2
-		return LCG(maxn, seedn, rand_range, a, lower1)
-
+from PRNG import *
 #password hash
-#def hash(password):
-#	numbers = PRNG.LCG(len(password), 257991014)
-#	h = 0
-#	for i in range(len(password)):
-#		h = h ^ ord(password[i]) ^ numbers[i]
-#	return h
 
 def sha2(password):
+	#first 32 bits of the fractional parts of the square roots of the first 8 primes
 	h0 = 0x6a09e667
 	h1 = 0xbb67ae85
 	h2 = 0x3c6ef372
@@ -41,6 +14,8 @@ def sha2(password):
 	h6 = 0x1f83d9ab
 	h7 = 0x5be0cd19
 
+	#hash values
+	#first 32 bits of the fractional parts of the square roots of the first 64 primes
 	k = [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 	0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
 	0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -50,6 +25,7 @@ def sha2(password):
 	0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
 	0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2]
 	
+	#pre processing
 	get_bin = lambda x, n: format(x,'b').zfill(n)
 
 	val = ''
@@ -65,6 +41,7 @@ def sha2(password):
 
 	val += get_bin(length, 64)
 
+	#processing message into successive 512-bit chunks
 	chunks = []
 	for i in range(len(val)//512):
 		chunks.append(val[i * 512: (i + 1) * 512])
@@ -82,6 +59,7 @@ def sha2(password):
 			s1 = (rightRotate(w[i-2], 17)) ^ (rightRotate(w[i-2], 19)) ^ (w[i-2] >> 10)
 			w[i] = w[i - 16] + s0 + w[i-7] + s1
 
+		#initialize working variables to current hash value
 		a = h0
 		b = h1
 		c = h2
@@ -91,7 +69,7 @@ def sha2(password):
 		g = h6
 		h = h7
 
-
+		#compression function
 		for i in range(64):
 			S1 = (rightRotate(e, 6)) ^ (rightRotate(e, 11)) ^ (rightRotate(e, 25))
 			ch = (e & f) ^ ((~e) & g)
@@ -109,6 +87,7 @@ def sha2(password):
 			b = a
 			a = temp1 + temp2
 
+		#adding compressed hunk to the current hash value
 		h0 = h0 + a
 		h1 = h1 + b
 		h2 = h2 + c
@@ -119,23 +98,7 @@ def sha2(password):
 		h7 = h7 + h
 
 	hashed = get_bin(h0, 32) + get_bin(h1, 32) + get_bin(h2, 32) + get_bin(h3, 32) + get_bin(h4, 32) + get_bin(h5, 32) + get_bin(h6, 32) + get_bin(h7, 32)
-
-	# for i in range(len(val)//64):
-	# 	a = ''
-	# 	for j in range(64):
-	# 		if j % 8 == 0:
-	# 			a += ' '
-	# 		a += val[i * 64 + j]
-
-	# 	print(a)
-
-	# print(len(val))
 	hashed = int(hashed, 2)
 
-
-
+	#final hash value
 	return hashed
-
-if __name__ == '__main__':
-	print(hex(sha2('hello world')))
-
