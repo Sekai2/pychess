@@ -4,6 +4,7 @@ import pygame
 import time
 from misc import *
 
+#identifies the index of the square selected
 def id_square(coordinate):
 	x = coordinate[0]
 	y = coordinate[1]
@@ -37,9 +38,6 @@ class gui():
 		clock = pygame.time.Clock()
 		gui_board = pygame.image.load('assets/board.png')
 
-		#defining fonts
-
-
 		#load pieces
 		white_pawn = pygame.image.load('assets/wp.png')#0
 		white_bishop = pygame.image.load('assets/wb.png')#1
@@ -56,7 +54,6 @@ class gui():
 		black_king = pygame.image.load('assets/bk.png')#11
 
 		#loading other assets
-
 		self.square_selected = pygame.image.load('assets/SquareSelected.png')
 		self.piece_pick = pygame.image.load('assets/piecepickpng.png')
 		self.checkmateW = pygame.image.load('assets/CheckmateW.png')
@@ -65,11 +62,6 @@ class gui():
 		self.piece_list = [white_pawn, white_bishop, white_knight, white_rook, white_queen, white_king, black_pawn, black_bishop, black_knight, black_rook, black_queen, black_king]
 
 		self.gameDisplay.blit(gui_board, (0,0))
-
-		for i in range(8):
-			x = (79 * (i+1)) - 70
-			position = (x,484)
-			self.gameDisplay.blit(white_pawn, (position))
 
 		crashed = False
 		checkmate = False
@@ -117,6 +109,7 @@ class gui():
 			pygame.display.update()
 			clock.tick(60)
 
+	#adding transparency to image
 	def __blit_alpha(self, source, location, opacity):
 		x = location[0]
 		y = location[0]
@@ -126,6 +119,7 @@ class gui():
 		temp.set_alpha(opacity)
 		self.gameDisplay.blit(temp, location)
 
+	#updating the pieces on the board
 	def __board_update(self):
 		f = open('board.txt', 'r')
 		board = f.read()
@@ -141,6 +135,7 @@ class gui():
 				elif board[i] == 'o':
 					pass
 
+	#loading the pawn transformation selection box
 	def piece_pick_load(self, colour):
 		if colour == 'black':
 			self.gameDisplay.blit(self.piece_pick, (166,125))
@@ -192,6 +187,7 @@ class gui():
 		y = (coordinate[1] // 79) * 79
 		self.__blit_alpha(self.square_selected, (x,y), 128)
 
+	#submitting user move input
 	def __move(self, coordinate1, coordinate2):
 		index1 = id_square(coordinate1)
 		index2 = id_square(coordinate2)
@@ -208,11 +204,11 @@ class gui():
 		self.coordinate1 = None
 		self.coordinate2 = None
 
+
 	def __choose_square(self):
 		if self.press_count == 3:
 			if pygame.mouse.get_pressed() == (True, False, False):
 				coordinate = pygame.mouse.get_pos()
-				print(coordinate)
 				result = None
 
 				x = coordinate[0]
@@ -233,10 +229,7 @@ class gui():
 					else:
 						result = None
 
-					print(result)
-
 					if result != None:
-						print(result)
 						f = open('move.txt','w')
 						f.write(result)
 						f.close()
