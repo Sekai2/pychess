@@ -156,16 +156,17 @@ class Pawn(Piece):
 				if board_rank(i) == board_rank(self.location):
 					target = i
 
-		if chessBoard.board[target] == None:
-			return 0
+			if chessBoard.board[target] == None:
+				return 0
 
-		if board_rank(destination) == board_rank(self.location) + direction:
-			if chessBoard.board[target].colour != self.colour:
-				if type(chessBoard.board[target]) == Pawn:
-					if chessBoard.board[target].double_move == True:
-						if board_rank(self.location) == rank:
-							if destination == (target + 16 * direction):
-								return i
+			if board_rank(destination) == board_rank(self.location) + direction:
+				if chessBoard.board[target].colour != self.colour:
+					if type(chessBoard.board[target]) == Pawn:
+						if chessBoard.board[target].double_move == True:
+							if board_rank(self.location) == rank:
+								if destination == (target + 16 * direction):
+									return i
+
 		return 0
 
 
@@ -1036,6 +1037,8 @@ class ChessBoard():
 
 								elif piece1.enPassant(location2, self) != 0:
 									take = piece1.enPassant(location2, self)
+									print('takennn')
+									print(take)
 									self.board[take] = None
 									result =  self.__update_Board(location1, location2, colour, piece1, piece2, revert)
 									if revert == True:
@@ -1367,8 +1370,6 @@ class Computer(Player):
 			self.rootNode = Node(board1)
 
 		self.__updateRoot()
-		print('rootNode is:')
-		self.rootNode.val.print_board()
 		self.grow(self.rootNode, 0, self.max_depth, self.colour)
 
 		maxing = False
@@ -1573,28 +1574,28 @@ class login():
 
 	#password hasher
 	def passwordHash(password):
-		# numbers = PRNG.LCG(len(password), 257991014)
-		# h = 0
-		# for i in range(len(password)):
-		# 	h = h ^ ord(password[i]) ^ numbers[i]
-		# return h
 		return sha2(password)
 
 	def create(username, password):
-		wrongLabel = ttk.Label(text='Username already taken', foreground='red')
-		hashed = hex(login.passwordHash(password))
-		conn = sqlite3.connect('chessplayers.db')
-		cursor = conn.cursor()
-		cursor.execute("""SELECT Username
-			FROM tblUsers
-			WHERE Username = '%s'""" % username)
-		check = cursor.fetchall()
-		if len(check) == 0:
-			cursor.execute("""INSERT INTO tblUsers (Username, Hash)
-				VALUES (?,?)""", (username, hashed))
-			conn.commit()
+		if len(username) != 0 and len(password) != 0:
+			hashed = hex(login.passwordHash(password))
+			conn = sqlite3.connect('chessplayers.db')
+			cursor = conn.cursor()
+			cursor.execute("""SELECT Username
+				FROM tblUsers
+				WHERE Username = '%s'""" % username)
+			check = cursor.fetchall()
+			if len(check) == 0:
+				cursor.execute("""INSERT INTO tblUsers (Username, Hash)
+					VALUES (?,?)""", (username, hashed))
+				conn.commit()
+
+			else:
+				wrongLabel = ttk.Label(text='Username already taken', foreground='red')
+				wrongLabel.pack(fill = 'x', expand = True)
 
 		else:
+			wrongLabel = ttk.Label(text='input a username and password', foreground='red')
 			wrongLabel.pack(fill = 'x', expand = True)
 
 	def hashCheck(username, password):
@@ -1637,9 +1638,6 @@ class login():
 
 		pvc_button = ttk.Button(root, text='SINGLE PLAYER', command = lambda: pvc())
 		pvc_button.pack(ipadx = 5, ipady = 5, expand = True)
-
-		load_button = ttk.Button(root, text='LOAD', command = lambda: login.load())
-		load_button.pack(ipadx = 5, ipady = 5, expand = True)
 
 	def load():
 		root.destroy()
