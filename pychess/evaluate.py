@@ -37,6 +37,7 @@ class evaluate():
 
 		return pairScore
 
+    #material evaluation
 	def material(count):
 		multiplier = [100,350,350,525,1000,10000]
 		materialScore = 0
@@ -49,11 +50,13 @@ class evaluate():
 
 		return materialScore
 
+    #mobility evaluation
 	def mobility(board):
 		#each square has a value of 1. Can be increased to change scaling
 		mobilityScore = 0
 		#defining centre squares as they are weighted more
-		#for speed some pawn structure features are also incorperated into mobility score
+		#for speed some pawn structure features are also 
+		#incorperated into mobility score
 		centre = [0x33, 0x34, 0x43, 0x44]
 		WpawnLocations = []
 		BpawnLocations = []
@@ -73,6 +76,7 @@ class evaluate():
 								if board.board[j].character == 'P':
 									mobilityScore += 2
 
+                            #bonuses for pawn moves to centre
 							if board.fullmove_clock < 10:
 								if i.location in [0x43,0x44]:
 									mobilityScore += 8
@@ -99,6 +103,7 @@ class evaluate():
 								if board.board[j].character == 'p':
 									mobilityScore -= 2
 
+                            #bonuses for pawn moves to the centre
 							if board.fullmove_clock < 10:
 								if i.location in [0x33,0x34]:
 									mobilityScore -= 8
@@ -159,5 +164,6 @@ class evaluate():
 
 		return (isolatedFiles * -1) + (doubled_pawns * -20) + chainScore + overextendScore
 
+	#final evaluation
 	def totalEval(board):
 		return evaluate.material(board.materialCount) + evaluate.mobility(board)

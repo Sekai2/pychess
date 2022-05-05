@@ -48,7 +48,8 @@ class Piece():
 
 		return(squares)
 
-	#identifies the between piece and a location, used to identify direction that needs to be updated for a sliding piece
+	#identifies the between piece and a location, used to identify direction that 
+	#needs to be updated for a sliding piece
 	def id_direction(self, moved):
 		if moved in self.ADSquares:
 			direction = moved - self.location
@@ -70,7 +71,8 @@ class Piece():
 
 			return direction
 
-	#updates ADSquares for sliding pieces when blocking pieces are moved or pieces are moved into slide line
+	#updates ADSquares for sliding pieces when blocking pieces are moved or pieces 
+	#are moved into slide line
 	def block_update(self, location1, location2, chessBoard):
 		if location2 in self.ADSquares:
 			self.update_ADSquares(chessBoard)
@@ -110,6 +112,7 @@ class Pawn(Piece):
 		if chessBoard.offBoardCheck(square2) == True:
 			self.ADSquares.append(square2)
 
+	#separate move function for non attacking pawn move validation
 	def movePawn(self, destination):
 		#pawn specific method for normal pawn movement
 		if self.colour == 'white':
@@ -138,8 +141,9 @@ class Pawn(Piece):
 
 		return False
 
+	#pawn specific method for moving a pawn using the en passant rule
+	#returns location of the pawn to be attacked
 	def enPassant(self, destination, chessBoard):
-		#pawn specific method for moving a pawn using the en passant rule
 		if self.colour == 'white':
 			rank = 3
 			direction = -1
@@ -250,6 +254,8 @@ class FEN():
 		self.standard = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 		self.quantity = 0
 
+	#initiates board population, allows for custom starting board states
+	#and loading board states
 	def load(self,mode):
 		if mode == 'file':
 			file_name = input('Input the file name')
@@ -312,6 +318,7 @@ class FEN():
 
 			pointer += 1
 
+	#setting up chess board for chessBoard class
 	def __initiate(self, FEN_code):
 		digits = '12345678'
 		board = []
@@ -432,6 +439,7 @@ class FEN():
 			
 		return(board)
 
+	#nontates for board comparison
 	def notate(self, board, turn):
 		count = 0
 		FEN_code = ''
@@ -693,7 +701,8 @@ class ChessBoard():
 
 		return piece
 
-
+	#revert function used mainly for reverting board after a
+	#invalid move due to check/checkmate
 	def __revert(self, location1, location2, piece2):
 		self.board[location1] = self.board[location2]
 		self.board[location1].location = location1
@@ -1261,43 +1270,32 @@ class Node():
 							result = tempBoard.move(i.location, i.location + 16, colour, False)
 							if result == True:
 								self.append(Node(tempBoard), (i.location, i.location + 16), colour)
-								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
-								#self.validate(self.val, i.location, i.location + 16, colour)
 
 							elif result == 'checkmate' or result == 'end':
 								self.append('terminal')
 								self.terminal = True
-								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, i.location + 32, colour, False)
 							if result == True:
 								self.append(Node(tempBoard), (i.location, i.location + 32), colour)
-								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
-								#self.validate(self.val, i.location, i.location + 32, colour)
 
 						elif colour == 'white':
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, i.location - 16, colour, False)
 							if result == True:
 								self.append(Node(tempBoard), (i.location, i.location - 16), colour)
-								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
-								#self.validate(self.val, i.location, i.location - 16, colour)
 
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, i.location - 32, colour, False)
 							if result == True:
 								self.append(Node(tempBoard), (i.location, i.location - 32), colour)
-								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
-								#self.validate(self.val, i.location, i.location - 32, colour)
 
 						for j in i.ADSquares:
 							tempBoard = self.val.copyBoard()
 							result = tempBoard.move(i.location, j, colour, False)
 							if result == True:
 								self.append(Node(tempBoard), (i.location, j), colour)
-								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
-								#self.validate(self.val, i.location, j, colour)
 
 					elif type(i) == King:
 						for j in i.ADSquares:
@@ -1305,8 +1303,6 @@ class Node():
 							result = tempBoard.move(i.location, j, colour, False)
 							if result == True:
 								self.append(Node(tempBoard), (i.location, j), colour)
-								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
-								#self.validate(self.val, i.location, j, colour)
 
 						if i.colour == 'white':
 							if i.location == 116:
@@ -1315,14 +1311,12 @@ class Node():
 									result = tempBoard.move(116, 114, colour, False)
 									if result == True:
 										self.append(Node(tempBoard), (116, 114), colour)
-										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
 									result = tempBoard.move(116, 118, colour, False)
 									if result == True:
 										self.append(Node(tempBoard), (116, 118), colour)
-										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 
 						if i.colour == 'black':
 							if i.location == 4:
@@ -1331,21 +1325,18 @@ class Node():
 									result = tempBoard.move(4, 2, colour, False)
 									if result == True:
 										self.append(Node(tempBoard), (4, 2), colour)
-										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 
 								if i.Kcastling == True:
 									tempBoard = self.val.copyBoard()
 									result = tempBoard.move(4, 7, colour, False)
 									if result == True:
 										self.append(Node(tempBoard), (4, 7), colour)
-										#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 
 					else:
 						for j in i.ADSquares:
 							tempBoard = self.val.copyBoard()
 							if tempBoard.move(i.location, j, colour, False) == True:
 								self.append(Node(tempBoard), (i.location, j), colour)
-								#boardTable.append(tempBoard, self.hashcolour, evaluate.totalEval(tempBoard), fen.notate(tempBoard, self.hashcolour))
 
 	#tree traversal algorithm
 	def count(self, node, ply, target_ply):
@@ -1377,7 +1368,6 @@ class Computer(Player):
 			maxing = True
 
 		optimalVal = self.minimax(0, self.rootNode, maxing, self.max_depth)
-		#optimalVal = self.minimax_AlphaBeta(0, self.rootNode, maxing, self.max_depth)
 
 		nextNode = optimalVal[1]
 		moveResult = board1.move(nextNode.move[0], nextNode.move[1], nextNode.colour, False)
@@ -1411,8 +1401,6 @@ class Computer(Player):
 		if maxing:
 			value = (-10000000000000000, None)
 			for i in node.children:
-				# if type(node.val) != int:
-				# 	value = -10000000000000000
 				value = tupleMax(value, self.minimax(depth +1, i, False, max_depth))
 			if depth == 0:
 				return value
@@ -1423,8 +1411,6 @@ class Computer(Player):
 		else:
 			value = (10000000000000000, None)
 			for i in node.children:
-				# if type(node.val) != int:
-				# 	value = 10000000000000000
 				value = tupleMin(value, self.minimax(depth +1, i, True, max_depth))
 			if depth == 0:
 				return value
@@ -1800,42 +1786,6 @@ def playing_as_black():
 			endColour = 'black'
 
 	endGame(endColour)
-
-def testMode(menu):
-	if menu == '3':
-		print('///////////computer test mode///////////')
-		cpu1 = Computer('white')
-		print('1st move count: ')
-		print(cpu1.test())
-
-	elif menu == '4':
-		print('///////////zobrist test mode////////////')
-		hashBoard = hashTable()
-		hashBoard.init_zobrist()
-		hashedBoard = hashBoard.hash(board1, 'white')
-		print(hashedBoard)
-
-	elif menu == '5':
-		player1 = Computer('white')
-		a = Node(None)
-		b = Node(None)
-		c = Node(None)
-		d = Node(None)
-		e = Node(None)
-		f = Node(None)
-		c.children = [Node(24),Node(654),Node(24),Node(678)]
-		d.children = [Node(84), Node(74)]
-		e.children = [Node(723), Node(85), Node(1644)]
-		f.children = [Node(627),Node(560),Node(45), Node(6264), Node(69)]
-		a.children = [c,d]
-		b.children = [e,f]
-		root = Node(None)
-		root.children = [a,b]
-		#player1.grow(root, 0, 2, 'white')
-		print(player1.minimax(0, root, True, 3))
-
-	else:
-		print('that is not an option')
 
 if __name__ == '__main__':
 	game()

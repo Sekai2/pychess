@@ -9,6 +9,8 @@ class hashTable():
 		self.black_move = PRNG.LCG(maxn = 1, seedn = 4829959, m = 18446744073709551557, a = 2774243619903564593)[0]
 		self.hashTbl = {}
 
+    #initiating zobrist hash values, one for each
+    #piece and every location
 	def init_zobrist(self):
 		self.table = []
 		for i in range(64):
@@ -20,6 +22,7 @@ class hashTable():
 			for j in range(12):
 				self.table[i][j] = self.random_val[i*12 + j]
 
+    #hashing algorithm for board
 	def hash(self, board, colour):
 		h = 0
 		if colour == 'black':
@@ -50,6 +53,7 @@ class hashTable():
 			replace = (replace[0], replace[1], replace[2], hashVal + 1)
 			self.append(board, colour, score, FEN, hashVal = hashVal + 1)
 
+	#fetching from lookup table
 	def find(self, content, colour, hashVal = None):
 		if hashVal == None:
 			hashVal = self.hash(content, colour)
